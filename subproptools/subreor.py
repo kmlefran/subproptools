@@ -357,25 +357,27 @@ def get_ref_bcps(sumfilenoext,atPairList,originAtom,originAtomXYZ=np.array([0.,0
 
 def get_reference_map():
     """creates dictionary with reference species to map coordinate system to"""
+    pathToRefs=sys.path[0].replace('subproptools','')+'/'+'referenceMaps'
+    print(pathToRefs)
     refDict={}
     carbonDict = {}
-    carbonDict.update({'sp3':get_ref_bcps('SubH_CFHCH3_reor_wb97xd_aug-cc-pvtz',[['C1','H3'],['C1','C4'],['C1','F8']],originAtom='C1')})
-    carbonDict.update({'sp2':get_ref_bcps('SubH_CHCH2_wb97xd_aug-cc-pvtz_reor',[['C1','H3'],['C1','H2']],originAtom='C1')})
+    carbonDict.update({'sp3':get_ref_bcps(pathToRefs + 'SubH_CFHCH3_reor_wb97xd_aug-cc-pvtz',[['C1','H3'],['C1','C4'],['C1','F8']],originAtom='C1')})
+    carbonDict.update({'sp2':get_ref_bcps(pathToRefs +'SubH_CHCH2_wb97xd_aug-cc-pvtz_reor',[['C1','H3'],['C1','H2']],originAtom='C1')})
     #carbonDict.update({'sp2':get_ref_bcps('SubH_CHCH2-ReorJuly2-B3LYP-def2-TZVPPD-Field',[['C1','H3'],['C1','C4']],'C1')})
     refDict.update({'C':carbonDict})
     boronDict = {}
-    boronDict.update({'sp3':get_ref_bcps('SubH_BHCH3BH2_wb97xd_aug-cc-pvtz_reor',[['B1','H3'],['B1','H4'],['B1','C5']],originAtom='B1')})
-    boronDict.update({'sp2':get_ref_bcps('SubH_BHF_wb97xd_aug-cc-pvtz_reor',[['B1','H3'],['B1','F4']],originAtom='B1')})
+    boronDict.update({'sp3':get_ref_bcps(pathToRefs +'SubH_BHCH3BH2_wb97xd_aug-cc-pvtz_reor',[['B1','H3'],['B1','H4'],['B1','C5']],originAtom='B1')})
+    boronDict.update({'sp2':get_ref_bcps(pathToRefs +'SubH_BHF_wb97xd_aug-cc-pvtz_reor',[['B1','H3'],['B1','F4']],originAtom='B1')})
     refDict.update({'B':boronDict})
     nitrogenDict = {}
-    nitrogenDict.update({'sp3':get_ref_bcps('SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor',[['N1','H3'],['N1','O4'],['N1','C5']],originAtom='N1')})
+    nitrogenDict.update({'sp3':get_ref_bcps(pathToRefs +'SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor',[['N1','H3'],['N1','O4'],['N1','C5']],originAtom='N1')})
     refDict.update({'N':nitrogenDict})
     phosphorousDict = {}
-    phosphorousDict.update({'sp3':get_ref_bcps('SubH_POCH3H_wb97xd_aug-cc-pvtz_reor',[['P1','H3'],['P1','O4'],['P1','C5']],originAtom='P1')})
+    phosphorousDict.update({'sp3':get_ref_bcps(pathToRefs +'SubH_POCH3H_wb97xd_aug-cc-pvtz_reor',[['P1','H3'],['P1','O4'],['P1','C5']],originAtom='P1')})
     refDict.update({'P':phosphorousDict})
     siliconDict = {}
-    siliconDict.update({'sp3':get_ref_bcps('SubH_SiFHCH3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','C4'],['Si1','F8']],originAtom='Si1')})
-    siliconDict.update({'sp2':get_ref_bcps('SubH_Si2H3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','Si4']],originAtom='Si1')})
+    siliconDict.update({'sp3':get_ref_bcps(pathToRefs +'SubH_SiFHCH3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','C4'],['Si1','F8']],originAtom='Si1')})
+    siliconDict.update({'sp2':get_ref_bcps(pathToRefs +'SubH_Si2H3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','Si4']],originAtom='Si1')})
     refDict.update({'Si':siliconDict})
     #update dictionary with further references
     return refDict
@@ -429,3 +431,24 @@ def rotate_substituent(sumFileNoExt,originAtom,negXAtom,posYAtom=0):
         txt_file.write(of_string)
     return outFrame
 
+def outputToGjf(old_file_name,reor_geom,esm='wB97XD',basis_set="aug-cc-pvtz",add_label='',n_procs=4,mem='3200MB',charge=0,multiplicity=1,wfx=True):
+    new_file_name =old_file_name+'_reor'+add_label
+    with open(new_file_name+'.gjf', 'a') as f:
+        f.write("%chk={chk}\n".format(chk=new_file_name+'.chk'))
+        if n_procs:
+            f.write('%nprocs={nprocs}\n'.format(nprocs=n_procs))
+        if mem:
+            f.write('%mem={mem}\n'.format(mem=mem))
+        if wfx:
+            f.write('#p {esm}/{bas} output=wfx nosymmetry\n'.format(esm=esm,bas=basis_set))
+        else:
+            f.write('#p {esm}/{bas} nosymmetry\n'.format(esm=esm,bas=basis_set))
+        f.write('\n')
+        f.write('single point on {file} reoriented by subproptools\n'.format(file=old_file_name))
+        f.write('\n')
+        f.write('{q} {mul}\n'.format(q=charge,mul=multiplicity))
+        dfAsString = reor_geom.to_string(header=False, index=False)
+        f.write(dfAsString)
+        f.write('\n')
+        f.write(new_file_name+'.wfx\n\n\n')
+    return
