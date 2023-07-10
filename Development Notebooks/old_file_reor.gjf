@@ -1,0 +1,20 @@
+%chk=old_file_reor.chk
+%nprocs=4
+%mem=3200MB
+#p wB97XD/aug-cc-pvtz output=wfx nosymmetry
+
+single point on old_file reoriented by subproptools
+
+0 1
+Si1  0.000000  0.000000  0.000000
+ H2 -1.482921  0.000000  0.000000
+ H3  0.499860  1.396124 -0.005641
+ C4  0.686936 -0.969819  1.428217
+ H5  1.776481 -0.981424  1.402869
+ H6  0.373451 -0.520793  2.372162
+ H7  0.330504 -1.999572  1.406982
+ F8  0.477269 -0.683409 -1.383661
+
+old_file_reor.wfx
+
+
