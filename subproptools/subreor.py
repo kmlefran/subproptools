@@ -357,7 +357,7 @@ def get_ref_bcps(sumfilenoext,atPairList,originAtom,originAtomXYZ=np.array([0.,0
 
 def get_reference_map():
     """creates dictionary with reference species to map coordinate system to"""
-    pathToRefs=sys.path[0].replace('subproptools','')+'/'+'referenceMaps'
+    pathToRefs=sys.path[0].replace('subproptools','')+'/'+'referenceMaps'+'/'
     print(pathToRefs)
     refDict={}
     carbonDict = {}
