@@ -1,6 +1,6 @@
 import setuptools
 setuptools.setup(name='subproptools',
-version='0.0.1',
+version='0.0.2',
 description='Extract group properties from .sum file and rotate substituent geometries',
 url='https://github.com/kmlefran/subproptools',
 author='Kevin M. Lefrancois-Gagnon',

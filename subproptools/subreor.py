@@ -377,7 +377,7 @@ def get_reference_map():
     refDict.update({'P':phosphorousDict})
     siliconDict = {}
     siliconDict.update({'sp3':get_ref_bcps(pathToRefs +'SubH_SiFHCH3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','C4'],['Si1','F8']],originAtom='Si1')})
-    siliconDict.update({'sp2':get_ref_bcps(pathToRefs +'SubH_Si2H3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','Si4']],originAtom='Si1')})
+    siliconDict.update({'sp2':get_ref_bcps(pathToRefs +'SubH_Si2H3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','NNA7']],originAtom='Si1')})
     refDict.update({'Si':siliconDict})
     #update dictionary with further references
     return refDict

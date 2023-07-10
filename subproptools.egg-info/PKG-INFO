@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: subproptools
-Version: 0.0.1
-Summary: Extract group properties from .sum file and rotate substituent geometries
-Home-page: https://github.com/kmlefran/subproptools
-Author: Kevin M. Lefrancois-Gagnon
-Author-email: kgagnon@lakeheadu.ca
