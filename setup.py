@@ -16,4 +16,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.11',
     ],
     zip_safe=False,
+    include_package_data=True,
+    package_data={'': ['test_data/*.sum']},
 )
