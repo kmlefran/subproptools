@@ -103,6 +103,8 @@ def _get_bcp_block(data,atPair=["C1","H2"]):
     if bcpStart == -2:
         print('didnt find first')
         bcpStart = _search_str(data,word='Type = (3,-1) BCP {at1} {at2}'.format(at1=atPair[1],at2=atPair[0]))-1
+    if bcpStart == -2:
+        raise ValueError('BCP between {a1} and {a2} not found in file'.format(a1=atPair[0], a2=atPair[1]))   
     bcpEnd = bcpStart+34 #_search_str(data,word='GBL_IV',searchStart=bcpStart) #find end of bcp data at GBL_IV
     bcpBlock = data[bcpStart:bcpEnd]
     #print(bcpBlock)
@@ -489,6 +491,8 @@ def get_sub_props(atomDict,subAtoms,atomList):
             first=False #don't come here again
             #could do this with a for loop, but only want select keys, not all
             #add the atomic property to the dictionary - at this point just atomic, will update later
+            if atomList[atom-1] not in list(atomDict.keys()):
+                raise ValueError('{a1} not in atoms in file'.format(a1=atomList[atom-1]))
             groupDict = {'q': [atomDict[atomList[atom-1]]['q'][0]], 
                          'K': [atomDict[atomList[atom-1]]['K'][0]],
                          'K_Scaled': [atomDict[atomList[atom-1]]['K_Scaled'][0]],
@@ -519,10 +523,17 @@ def get_sub_props(atomDict,subAtoms,atomList):
     groupDict.update({'|Mu_Bond|' : [math.sqrt(groupDict['Mu_X'][0]**2 + groupDict['Mu_Y'][0]**2 + groupDict['Mu_Z'][0]**2)]})     
     return groupDict
 
-def extract_sub_props(sumFileNoExt,subAtoms,groupProps=True,bcpId = [[1,2]],lapRhoCpAtoms=[]):
+def _check_num_atoms(atom_label_list:list[str],atom_int_list:list(str)) -> None:
+    num_atoms = len(atom_label_list)
+    max_int  = max(atom_int_list)
+    if max_int > num_atoms:
+        raise ValueError('Largest group atom index {ind} greater than number of atoms in file'.format(ind=max_int))
+    return
+
+def extract_sub_props(data:list[str],subAtoms:list[int],sumFileNoExt:str,groupProps=True,bcpId = [[1,2]],lapRhoCpAtoms=[]):
     """returns a dictionary of all group properties - bcp, group, atomic, and vscc
     Args:
-        sumFileNoExt - a sumfile name, without the .sum
+        data: list[str] - lines of a .sum file
         subAtoms - indices of atoms in the molecule comprising group - starts at 1
         groupProps - boolean - do you want to compute group properties
         bcpId - list of 2 length lists. Pass empty list if no bcp properties wanted. 2 length lists are indices of atoms that you want BCPs for
@@ -548,12 +559,11 @@ def extract_sub_props(sumFileNoExt,subAtoms,groupProps=True,bcpId = [[1,2]],lapR
             (repeat for all requested atoms in lapRhoCpAtoms)
             }
     """
-    sumFile = open(sumFileNoExt+".sum","r") #open file, read lines, close file
-    data = sumFile.readlines()
-    sumFile.close()
+    
     #find atom labels in atomList
     atomTable = _get_table(data,'q(A)              L(A)              K(A)          K_Scaled(A)      |Mu_Intra(A)|')
     atomList = list(atomTable['Atom'])
+    _check_num_atoms(atomList,subAtoms)
     subatomLabels = []
     for i,atom in enumerate(atomList):
         if any(x == i+1 for x in subAtoms):
@@ -634,7 +644,7 @@ def _find_connected(data,negXAtomLabel,originAtomLabel):
     return bcpList
 
 
-def sub_prop_frame(csvFile):
+def sub_prop_frame(csvFile:str) -> dict:
     """Given csv file, extract group properties for all files included and store properties
     Args:
         csvFile: string containing csv file (WITH extension)
@@ -680,9 +690,12 @@ def sub_prop_frame(csvFile):
         count=0 #For first iteration for each label will create the data frame
         for row_num,sub in enumerate(csvFrame['Substituent']): #iterate over substituents
             #extract sumfile name from table
-            sumFile = csvFrame[csvFrame['Substituent']==sub][csvFrame.columns[col]].iloc[0]
+            sumFileName = csvFrame[csvFrame['Substituent']==sub][csvFrame.columns[col]].iloc[0]
             #get properties
-            extracted_props = extract_sub_props(sumFile,subAtoms[row_num])
+            sumFile = open(sumFileName+".sum","r") #open file, read lines, close file
+            data = sumFile.readlines()
+            sumFile.close()
+            extracted_props = extract_sub_props(data,subAtoms[row_num],sumFileName)
             # dont want to store array in data frame
             excludeKeys = ['xyz']
             #add a substituent label to data frame
@@ -720,7 +733,7 @@ def sub_prop_frame(csvFile):
         all_label_dict.update({csvFrame.columns[col]: ind_label_dict })
     return all_label_dict         
 
-def get_xyz(sumfile):
+def get_xyz(sumfile:str) -> dict:
     """Given sumfile, return dicitonary containing xyzcoordinates and atom labels
     
     Args:
