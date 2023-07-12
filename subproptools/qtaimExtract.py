@@ -266,7 +266,7 @@ def _find_closest_nuclei(xyz,atomDict):
     #return atList with indices of npDistList that are equal to the two lowest values
     return [atList[np.where(npDistList==minDist[0])[0][0]],atList[np.where(npDistList==minDist[1])[0][0]]]
 
-def _identify_vscc(multiccDict,atomDict, thresh=0.7):
+def identify_vscc(multiccDict,atomDict, thresh=0.7):
     """Given dictionary of charge concentraion properties and atomic properties, identify vscc
     
     Args:
@@ -614,7 +614,7 @@ def extract_sub_props(data:list[str],subAtoms:list[int],sumFileNoExt:str,groupPr
         vsccProps={}
         for atom in lapRhoCpAtoms:#for each atom requested, get lapRhoCps
             allCC = get_cc_props(sumFileNoExt,atomList[atom-1])
-            vsccProps.update({atomList[atom-1]: _identify_vscc(allCC,atomicProps)})
+            vsccProps.update({atomList[atom-1]: identify_vscc(allCC,atomicProps)})
     else:
         vsccProps={"VSCC Props not requested"}
     #create output dictionary to return all requested properties, if a property not requested return a string stating that    
