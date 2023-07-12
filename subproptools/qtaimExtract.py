@@ -523,7 +523,7 @@ def get_sub_props(atomDict,subAtoms,atomList):
     groupDict.update({'|Mu_Bond|' : [math.sqrt(groupDict['Mu_X'][0]**2 + groupDict['Mu_Y'][0]**2 + groupDict['Mu_Z'][0]**2)]})     
     return groupDict
 
-def _check_num_atoms(atom_label_list:list[str],atom_int_list:list(str)) -> None:
+def _check_num_atoms(atom_label_list:list[str],atom_int_list:list[str]) -> None:
     num_atoms = len(atom_label_list)
     max_int  = max(atom_int_list)
     if max_int > num_atoms:
