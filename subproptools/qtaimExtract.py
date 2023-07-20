@@ -1,3 +1,21 @@
+"""qtaimExtract
+Tools for extracting data from sum files(and CC from agpviz), and calculating substituent properties specifically
+
+Authors
+Kevin Lefrancois-Gagnon
+Robert C. Mawhinney
+
+User facing functions
+* get_sub_di - gets delocalization index between a substituent and the rest of the molecule
+* get bcp_properties - returns a dictionary of bcp properties for a given bcp
+* get_atomic_props - returns dictionary of atomic properties for all atoms in molecule
+* get_cc_props - returns dictionary of properties for all charge concentrations
+* identify_vscc - returns only the VSCC from a set of charge concentrations
+* get_sub_props - returns dictionary of one substituent's properties
+* extract_sub_props - returns dictionary of atomic, group, bcp and vscc properties for a substituent
+* sub_prop_frame - returns dictioanry of frames of group properties
+* get_xyz - extracts a molecule's xyz geometry from sum file
+"""
 import os # file system stuff
 import pandas as pd #data frames
 import math #sqrt

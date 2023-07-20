@@ -1,3 +1,22 @@
+"""subreor
+Module to reorient a substituent to match a defined coordinate system
+ First an atom is positioned at the origin. 
+ By convention, this is the atom of the group that is directly bonded to the rest of the molecule. 
+ The rest of the molecule is placed along the -x axis. The remaining axes are defined as follows:
+* if there is one lone pair(VSCC), that point lies on the +y
+* if there are two lone pairs, the average position of them lies on the +y
+* if there are no lone pairs, map the BCPs of the atom at the origin to a reference. Identify the closest match to the reference to determine a BCP to set as +y
+
+# Authors
+Kevin Lefrancois-Gagnon
+Robert C. Mawhinney
+
+# User Facing Functions:
+## subreor
+* rotate_sheet - performs rotations to the desired coordinate system for many molecules as defined in a csv file
+* output_to_gjf - writes the reoreinted geometry to a .gjf file
+* rotate_substituent - performs the defined rotation for an individual substituent
+"""
 import sys
 import os
 sys.path.append(sys.path[0].replace('subproptools','')+'/'+'referenceMaps')
@@ -5,8 +24,9 @@ import pandas as pd #data frames
 import math #sqrt
 import numpy as np
 from subproptools import qtaimExtract as qt #sum file manipulation and property extraction
-
+from subproptools.reference_maps import _REFERENCE_MAP
 #define stat dicitnoary for scaling bcp properties
+#determined by taking all BCPs in the substrate paper of KLG and calculating mean and sd of each property
 _DEFAULT_STAT_DICT = {'rho': {'mean':0.290686,'sd':0.077290},
                  'lambda1':{'mean':-0.725552,'sd':0.299756},
                  'lambda2':{'mean':-0.678830,'sd':0.291123},
@@ -17,235 +37,6 @@ _DEFAULT_STAT_DICT = {'rho': {'mean':0.290686,'sd':0.077290},
                  'G':{'mean':0.135342,'sd':0.184923},
                  'H':{'mean':-0.340622,'sd':0.176627},
                  'DI(R,G)':{'mean':1.081894,'sd':0.369324},}
-
-#define reference maps for rotation
-_SP3_CARBON_BCP_DICT = {
-    'C1-H3': {'xyz': np.array([ 0.        ,  1.25015821, -0.00235558]),
-  'rho': [0.29632696936],
-  'lambda1': [-0.85302912761],
-  'lambda2': [-0.81303659844],
-  'lambda3': [0.47413487677],
-  'DelSqRho': [-1.1919308493],
-  'Ellipticity': [0.049189088474],
-  'V': [-0.37184352147],
-  'G': [0.036930404577],
-  'H': [-0.33491311689299996]},
- 'C1-F8': {'xyz': np.array([ 0.        , -0.35624989, -0.74223654]),
-  'rho': [0.23829406815],
-  'lambda1': [-0.4245753785],
-  'lambda2': [-0.41016717535],
-  'lambda3': [0.89122326411],
-  'DelSqRho': [0.056480710264],
-  'Ellipticity': [0.035127635803],
-  'V': [-0.68209769455],
-  'G': [0.34810893606],
-  'H': [-0.33398875849000004]},
- 'C1-C4': {'xyz': np.array([ 0.        , -0.7598954 ,  1.12297281]),
-  'rho': [0.26194645384],
-  'lambda1': [-0.53899298565],
-  'lambda2': [-0.51656172708],
-  'lambda3': [0.3428304022],
-  'DelSqRho': [-0.71272431054],
-  'Ellipticity': [0.043424159007],
-  'V': [-0.29901033382],
-  'G': [0.060414628094],
-  'H': [-0.23859570572599997]}
-}
-
-_SP2_CARBON_BCP_DICT = {'C1-H3': {'xyz': np.array([0.00000000e+00, 1.16430959e+00, 3.38675717e-17]),
-  'rho': [0.29183770628],
-  'lambda1': [-0.80520264462],
-  'lambda2': [-0.79941295281],
-  'lambda3': [0.44085193209],
-  'DelSqRho': [-1.1637636653],
-  'Ellipticity': [0.0072424293269],
-  'V': [-0.37436126977],
-  'G': [0.041710176716],
-  'H': [-0.332651093054]},
- 'C1-C4': {'xyz': np.array([ 0.00000000e+00, -1.06357498e+00, -5.56714996e-16]),
-  'rho': [0.36288408448],
-  'lambda1': [-0.83468307102],
-  'lambda2': [-0.62545003471],
-  'lambda3': [0.15660468687],
-  'DelSqRho': [-1.3035284189],
-  'Ellipticity': [0.3345319765],
-  'V': [-0.62700069759],
-  'G': [0.15055929644],
-  'H': [-0.47644140115]}}
-
-_SP3_BORON_BCP_DICT = {'B1-H3': {'xyz': np.array([ 0.        ,  0.92742229, -0.18477357]),
-  'rho': [0.12300243683],
-  'lambda1': [-0.17214219218],
-  'lambda2': [-0.14265466718],
-  'lambda3': [0.42509227636],
-  'DelSqRho': [0.110295417],
-  'Ellipticity': [0.20670564506],
-  'V': [-0.23579025344],
-  'G': [0.13168205384],
-  'H': [-0.1041081996]},
- 'B1-C5': {'xyz': np.array([ 0.        , -0.22289873, -0.93254826]),
-  'rho': [0.12047147227],
-  'lambda1': [-0.14773895803],
-  'lambda2': [-0.11298066129],
-  'lambda3': [0.33173067015],
-  'DelSqRho': [0.071011050836],
-  'Ellipticity': [0.30764819702],
-  'V': [-0.22525108014],
-  'G': [0.12150192142],
-  'H': [-0.10374915872]},
- 'B1-H4': {'xyz': np.array([ 0.        , -0.43919783,  0.70581714]),
-  'rho': [0.18145419362],
-  'lambda1': [-0.38722702492],
-  'lambda2': [-0.37404958811],
-  'lambda3': [0.45979611296],
-  'DelSqRho': [-0.30148050007],
-  'Ellipticity': [0.035229117263],
-  'V': [-0.31882116911],
-  'G': [0.12172552204],
-  'H': [-0.19709564707000002]}}
-
-_SP2_BORON_BCP_DICT = {'B1-H3': {'xyz': np.array([ 0.00000000e+00,  8.11870811e-01, -4.43740716e-16]),
-  'rho': [0.19110739213],
-  'lambda1': [-0.46141987776],
-  'lambda2': [-0.40921992633],
-  'lambda3': [0.44346099627],
-  'DelSqRho': [-0.42717880782],
-  'Ellipticity': [0.12755965211],
-  'V': [-0.32443350486],
-  'G': [0.10881940145],
-  'H': [-0.21561410340999998]},
- 'B1-F4': {'xyz': np.array([ 0.00000000e+00, -7.37862359e-01,  1.93163647e-16]),
-  'rho': [0.20662382934],
-  'lambda1': [-0.67411870986],
-  'lambda2': [-0.56240110796],
-  'lambda3': [2.5243450739],
-  'DelSqRho': [1.2878252561],
-  'Ellipticity': [0.19864399328],
-  'V': [-0.6323324474],
-  'G': [0.47714438071],
-  'H': [-0.15518806669000007]}}
-
-_SP3_NITROGEN_BCP_DICT = {'N1-H3': {'xyz': np.array([0.        , 1.39422451, 0.00543887]),
-  'rho': [0.33833704323],
-  'lambda1': [-1.2918559059],
-  'lambda2': [-1.2716835],
-  'lambda3': [0.85793011206],
-  'DelSqRho': [-1.7056092939],
-  'Ellipticity': [0.015862756642],
-  'V': [-0.52200823266],
-  'G': [0.047802954594],
-  'H': [-0.474205278066]},
- 'N1-O4': {'xyz': np.array([ 0.        , -0.63122426, -1.0353918 ]),
-  'rho': [0.35088013303],
-  'lambda1': [-0.78650875363],
-  'lambda2': [-0.78506939426],
-  'lambda3': [1.3832612581],
-  'DelSqRho': [-0.18831688977],
-  'Ellipticity': [0.0018334167423],
-  'V': [-0.53352667926],
-  'G': [0.24322372841],
-  'H': [-0.29030295084999996]},
- 'N1-C5': {'xyz': np.array([ 0.        , -0.65245651,  1.47278505]),
-  'rho': [0.24674849376],
-  'lambda1': [-0.48766358511],
-  'lambda2': [-0.46565621172],
-  'lambda3': [0.32464807311],
-  'DelSqRho': [-0.62867172372],
-  'Ellipticity': [0.047260989639],
-  'V': [-0.35743098181],
-  'G': [0.10013152544],
-  'H': [-0.25729945637]}}
-
-_SP3_PHOSPHOROUS_BCP_DICT = {'P1-H3': {'xyz': np.array([0.        , 1.26385682, 0.00494592]),
-  'rho': [0.17523148631],
-  'lambda1': [-0.30194810012],
-  'lambda2': [-0.28264362027],
-  'lambda3': [0.44213586293],
-  'DelSqRho': [-0.14245585747],
-  'Ellipticity': [0.068299719025],
-  'V': [-0.33080503772],
-  'G': [0.14759553668],
-  'H': [-0.18320950103999997]},
- 'P1-O4': {'xyz': np.array([ 0.        , -0.58969576, -0.83336938]),
-  'rho': [0.2366336491],
-  'lambda1': [-0.39519084069],
-  'lambda2': [-0.39303248004],
-  'lambda3': [2.1516401064],
-  'DelSqRho': [1.3634167857],
-  'Ellipticity': [0.005491557963],
-  'V': [-0.74971032231],
-  'G': [0.54528225936],
-  'H': [-0.20442806295000004]},
- 'P1-C5': {'xyz': np.array([ 0.        , -0.35462054,  1.23291434]),
-  'rho': [0.17350204252],
-  'lambda1': [-0.26162785795],
-  'lambda2': [-0.24116223985],
-  'lambda3': [0.29034324591],
-  'DelSqRho': [-0.21244685189],
-  'Ellipticity': [0.08486244827],
-  'V': [-0.31020609825],
-  'G': [0.12854719264],
-  'H': [-0.18165890561]}}
-
-_SP3_SI_BCP_DICT = {'Si1-H3': {'xyz': np.array([0.        , 1.27973328, 0.00517033]),
-  'rho': [0.12414909335],
-  'lambda1': [-0.20581129439],
-  'lambda2': [-0.19632482872],
-  'lambda3': [0.58847810247],
-  'DelSqRho': [0.18634197935],
-  'Ellipticity': [0.048320254397],
-  'V': [-0.21031525709],
-  'G': [0.12845037596],
-  'H': [-0.08186488113000001]},
- 'Si1-F8': {'xyz': np.array([ 0.        , -0.53009648, -1.08479626]),
-  'rho': [0.13244199788],
-  'lambda1': [-0.27302642228],
-  'lambda2': [-0.27272649439],
-  'lambda3': [1.5898643458],
-  'DelSqRho': [1.0441114291],
-  'Ellipticity': [0.0010997387276],
-  'V': [-0.33781650703],
-  'G': [0.29942218215],
-  'H': [-0.03839432488]},
- 'Si1-C4': {'xyz': np.array([ 0.        , -0.71188794,  1.04126176]),
-  'rho': [0.12665648789],
-  'lambda1': [-0.1843126043],
-  'lambda2': [-0.1757363122],
-  'lambda3': [0.56650837256],
-  'DelSqRho': [0.20645945606],
-  'Ellipticity': [0.048802048906],
-  'V': [-0.21962871024],
-  'G': [0.13562178713],
-  'H': [-0.08400692310999999]}}
-
-_SP2_SI_BCP_DICT = {'Si1-H3': {'xyz': np.array([ 0.        ,  1.23757956, -0.00766368]),
-  'rho': [0.12096117641],
-  'lambda1': [-0.1905393755],
-  'lambda2': [-0.17657152668],
-  'lambda3': [0.57387809704],
-  'DelSqRho': [0.20676719486],
-  'Ellipticity': [0.079105895977],
-  'V': [-0.20375573354],
-  'G': [0.12772376613],
-  'H': [-0.07603196741000001]},
- 'Si1-NNA7': {'xyz': np.array([ 0.        , -1.26148618,  0.24490124]),
-  'rho': [0.10836999179],
-  'lambda1': [-0.11714251117],
-  'lambda2': [-0.057140471201],
-  'lambda3': [0.092875642396],
-  'DelSqRho': [-0.081407339975],
-  'Ellipticity': [1.0500795444],
-  'V': [-0.13782730849],
-  'G': [0.058737736748],
-  'H': [-0.07908957174199999]}}
-
-_REFERENCE_MAP = {
-    'C':{'sp3':_SP3_CARBON_BCP_DICT,'sp2':_SP2_CARBON_BCP_DICT},
-    'B':{'sp3':_SP3_BORON_BCP_DICT,'sp2':_SP2_BORON_BCP_DICT},
-    'N':{'sp3':_SP3_NITROGEN_BCP_DICT},
-    'P':{'sp3':_SP3_PHOSPHOROUS_BCP_DICT},
-    'Si':{'sp3':_SP3_SI_BCP_DICT,'sp2':_SP2_SI_BCP_DICT},
-}
 
 def _get_bcp_reference(originAtom,numBonds):
     """Takes atom and number of bonds and chooses the right map to use."""
@@ -277,26 +68,6 @@ def _get_bcp_reference(originAtom,numBonds):
         # print('phosphonium')
         retDict = _REFERENCE_MAP['P']['sp3']
     return retDict 
-
-# def _default_stat_dict():
-#     """defines mean and sd for scaling properties if no other available
-    
-#     Scaling based on mean & sd of all bcps of files used in transferability paper(not just Substrate-Substituent)
-#     See:notebooks/bcpStatExtraction.ipynb
-#     Returns:
-#       a dictionary for each property, with names matching the names returned in a get_bcp_properties dictionary
-#     """
-#     stat_dict = {'rho': {'mean':0.290686,'sd':0.077290},
-#                  'lambda1':{'mean':-0.725552,'sd':0.299756},
-#                  'lambda2':{'mean':-0.678830,'sd':0.291123},
-#                  'lambda3':{'mean':0.583261,'sd':0.449474},
-#                  'DelSqRho':{'mean':-0.821120,'sd':0.570553},
-#                  'Ellipticity':{'mean':0.077722,'sd':0.137890},
-#                  'V':{'mean':-0.475963,'sd':0.332327},
-#                  'G':{'mean':0.135342,'sd':0.184923},
-#                  'H':{'mean':-0.340622,'sd':0.176627},
-#                  'DI(R,G)':{'mean':1.081894,'sd':0.369324},}
-#     return stat_dict
 
 def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel):
     """
@@ -330,18 +101,11 @@ def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel):
     #at this point have bcpDictionary ordered from 1st to last with clockwise bcp
     return clockwiseKeys #this is a dictionary of bcps
 
-# def _angle_btw_bcp(xyzA,xyzB,atomXYZ=np.array([0.,0.,0.])):
-#     """find angle between two bcp orientation vectors defined by x,y,z np.array, after flattening to yz plane."""
-#     xyzA[0], xyzA[1], xyzA[2] = [xyzA[0]-atomXYZ[0], xyzA[1]-atomXYZ[1], xyzA[2]-atomXYZ[2]]
-#     xyzB[0], xyzB[1], xyzB[2] = [xyzB[0]-atomXYZ[0], xyzB[1]-atomXYZ[1], xyzB[2]-atomXYZ[2]]
-#     angle= math.acos((xyzA[0]*xyzB[0]+xyzA[1]*xyzB[1]+xyzA[2]*xyzB[2])/(math.sqrt(xyzA[0]**2+xyzA[1]**2+xyzA[2]**2)*math.sqrt(xyzB[0]**2+xyzB[1]**2+xyzB[2]**2)))
-#     return angle
 
 def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,0.0,0.0])):
     """given dictionary of bcp properties, find which ones are in a clockwise rotation"""
     #return list of dictionary keys ordered for clockwise rotation
-    # print(bcpPropDict)
-    # print(originAtomLabel)
+
     crossDict = {}
     for key1 in bcpPropDict:
         print(key1)
@@ -370,11 +134,6 @@ def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,
         start = string[0]
         end = string[2]
         orderDict.update({cw:{'Start':start,'End':end}})
-#         keyDict={} #only one loop with key
-#         xyz = bcpPropDict[key]['xyz']-originAtomXYZ
-#         keyDict.update({'AngleToY': _angle_btw_bcp(xyz,np.array([0.0,1.0,0.0]))})
-#         keyDict.update({'AngleToZ': _angle_btw_bcp(xyz,np.array([0.0,0.0,1.0]))})
-#         angleDict.update({key:keyDict})
     keysList = list(orderDict.keys())
     if len(keysList) == 3:
         if orderDict[keysList[0]]['End'] != orderDict[keysList[1]]['Start'] and orderDict[keysList[0]]['End'] == orderDict[keysList[2]]['Start']:
@@ -440,18 +199,6 @@ def _set_xaxis(xyzArray,negXAtom):
     #define initial xyz vector lengths. Should be unchanged after rotation
     tol = 0.0001 #tolerance for change
     initial_lengths= _get_lengths(xyzArray)
-
-    #Set Givens matrix for first rotation to zero [2,2]
-#     if t_xyz[0,1] == 0 and t_xyz[1,1] == 0: #on xy
-#         G= np.array([[0,0,1],[0,1,0],[-1,0,0]])
-#     elif t_xyz[1,1] == 0 and t_xyz[2,1] == 0: #already on x axis atom 2 y and z=0
-#         G = np.array([[1,0,0],[0,0,1],[0,0,1]])
-#     elif t_xyz[0,1] == 0 and t_xyz[2,1] == 0:
-#         G = np.array([[0,1,0],[-1,0,0],[0,0,1]])
-#     else:
-#         d = t_xyz[0,1]/math.sqrt(t_xyz[0,1]**2 + t_xyz[1,1]**2)
-#         s = t_xyz[1,1]/math.sqrt(t_xyz[0,1]**2 + t_xyz[1,1]**2)
-#         G = np.array([[d,s,0],[-s,d,0],[0,0,1]])
     t_rot1 = _zero_y_for_negx(t_xyz,negXAtom)
     rot1_lengths = _get_lengths(t_rot1.T)
     if np.any((rot1_lengths - initial_lengths)>tol):
@@ -469,17 +216,10 @@ def _set_xaxis(xyzArray,negXAtom):
         return t_rot_final.T
     else:
         return t_rot2.T
-    
-def _align_dicts(testDict,refDict,statDict):
-    """
-    Arguments:
-        testDict and refDict:For two dictionaries that are ordered in same rotational sense
-        statDict: scaling to use
-    Returns:
-        np.array of xyz point to use
-    """
-    testKeysList = list(testDict.keys())
+
+def _popelier_match_scores(testDict, refDict,statDict):
     refDictKeysList = list(refDict.keys())
+    testKeysList = list(testDict.keys())
     #BCP distances for first match
     dif00 = _get_popelier_dif(testDict[testKeysList[0]],refDict[refDictKeysList[0]],statDict)
     dif11 = _get_popelier_dif(testDict[testKeysList[1]],refDict[refDictKeysList[1]],statDict)
@@ -492,8 +232,20 @@ def _align_dicts(testDict,refDict,statDict):
     dif20 = _get_popelier_dif(testDict[testKeysList[2]],refDict[refDictKeysList[0]],statDict)
     dif01 = _get_popelier_dif(testDict[testKeysList[0]],refDict[refDictKeysList[1]],statDict)
     dif12 = _get_popelier_dif(testDict[testKeysList[1]],refDict[refDictKeysList[2]],statDict)
+    return [dif00+dif11+dif22,dif10+dif21+dif02,dif20+dif01+dif12]
     #Total score list and index of closest space
-    matchScores = [dif00+dif11+dif22,dif10+dif21+dif02,dif20+dif01+dif12]
+
+def _align_dicts(testDict,refDict,statDict):
+    """
+    Arguments:
+        testDict and refDict:For two dictionaries that are ordered in same rotational sense
+        statDict: scaling to use
+    Returns:
+        np.array of xyz point to use
+    """
+    matchScores = _popelier_match_scores(testDict,refDict,statDict)
+    refDictKeysList = list(refDict.keys())
+    testKeysList = list(testDict.keys())
     minInd = matchScores.index(min(matchScores))
     
     #identify the refDict BCP that is on the +y axis
@@ -542,10 +294,8 @@ def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_sta
         vkeys = list(vscc.keys())
         
         posYPoint = (vscc[vkeys[0]]['xyz'] + vscc[vkeys[1]]['xyz'])/2
-        # print(posYPoint)
         #reorient to average of vscc points for +y
     else:
-        #refDict = _get_reference_map()
         sumFile = open(sumFileNoExt+".sum",'r')
         data = sumFile.readlines()
         sumFile.close()
@@ -596,48 +346,6 @@ def _get_popelier_dif(bcpDictA,bcpDictB,statDict):
             scaledB = (bcpDictB[prop][0]-statDict[prop]['mean'])/statDict[prop]['sd']
             distancesq += (scaledA - scaledB)**2
     return math.sqrt(distancesq)    
-
-
-#commented out - have included reference bcps at data at top of file rather tahn calculating each time
-# def _get_ref_bcps(sumfilenoext,atPairList,originAtom,originAtomXYZ=np.array([0.,0.,0.])):
-#     """given reference sumfile, extract bcp properties for needed bcps"""
-#     sumFile = open(sumfilenoext+".sum","r") #open file, read lines, close file
-#     data = sumFile.readlines()
-#     sumFile.close()
-#     bcpDict = {}
-#     for bcp in atPairList:
-#         #block = qt.get_bcp_block(data,bcp)
-#         bcpDict.update({'{at1}-{at2}'.format(at1=bcp[0],at2=bcp[1]):qt.get_bcp_properties(data,bcp)})
-#     clockbcpDict = _find_clockwise_rot(bcpDict,originAtom,originAtomXYZ)    
-#     return clockbcpDict  
-
-
-# def _get_reference_map():
-#     """creates dictionary with reference species to map coordinate system to"""
-#     pathToRefs=sys.path[0].replace('subproptools','')+'/'+'referenceMaps'+'/'
-#     print(pathToRefs)
-#     refDict={}
-#     carbonDict = {}
-#     carbonDict.update({'sp3':_get_ref_bcps(pathToRefs + 'SubH_CFHCH3_reor_wb97xd_aug-cc-pvtz',[['C1','H3'],['C1','C4'],['C1','F8']],originAtom='C1')})
-#     carbonDict.update({'sp2':_get_ref_bcps(pathToRefs +'SubH_CHCH2_wb97xd_aug-cc-pvtz_reor',[['C1','H3'],['C1','H2']],originAtom='C1')})
-#     #carbonDict.update({'sp2':_get_ref_bcps('SubH_CHCH2-ReorJuly2-B3LYP-def2-TZVPPD-Field',[['C1','H3'],['C1','C4']],'C1')})
-#     refDict.update({'C':carbonDict})
-#     boronDict = {}
-#     boronDict.update({'sp3':_get_ref_bcps(pathToRefs +'SubH_BHCH3BH2_wb97xd_aug-cc-pvtz_reor',[['B1','H3'],['B1','H4'],['B1','C5']],originAtom='B1')})
-#     boronDict.update({'sp2':_get_ref_bcps(pathToRefs +'SubH_BHF_wb97xd_aug-cc-pvtz_reor',[['B1','H3'],['B1','F4']],originAtom='B1')})
-#     refDict.update({'B':boronDict})
-#     nitrogenDict = {}
-#     nitrogenDict.update({'sp3':_get_ref_bcps(pathToRefs +'SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor',[['N1','H3'],['N1','O4'],['N1','C5']],originAtom='N1')})
-#     refDict.update({'N':nitrogenDict})
-#     phosphorousDict = {}
-#     phosphorousDict.update({'sp3':_get_ref_bcps(pathToRefs +'SubH_POCH3H_wb97xd_aug-cc-pvtz_reor',[['P1','H3'],['P1','O4'],['P1','C5']],originAtom='P1')})
-#     refDict.update({'P':phosphorousDict})
-#     siliconDict = {}
-#     siliconDict.update({'sp3':_get_ref_bcps(pathToRefs +'SubH_SiFHCH3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','C4'],['Si1','F8']],originAtom='Si1')})
-#     siliconDict.update({'sp2':_get_ref_bcps(pathToRefs +'SubH_Si2H3_wb97xd_augccpvtz_reor',[['Si1','H3'],['Si1','NNA7']],originAtom='Si1')})
-#     refDict.update({'Si':siliconDict})
-#     #update dictionary with further references
-#     return refDict
 
 
 def rotate_substituent(sumFileNoExt,originAtom,negXAtom,posYAtom=0):
@@ -696,9 +404,7 @@ def rotate_substituent(sumFileNoExt,originAtom,negXAtom,posYAtom=0):
     outFrame = pd.DataFrame(final_orientation*0.529177,columns = ['x','y','z'])
     outFrame['Atom'] = molecule_xyz['Atoms']
     outFrame = outFrame[['Atom','x','y','z']]
-    # with open(sumFileNoExt+'_reor.txt','w') as txt_file:
-    #     of_string = outFrame.to_string(header=False,index=False)
-    #     txt_file.write(of_string)
+
     return outFrame
 
 def output_to_gjf(old_file_name,reor_geom,esm='wB97XD',basis_set="aug-cc-pvtz",add_label='',
@@ -801,3 +507,23 @@ def rotate_sheet(csv_file,esm,basis,n_procs=4,mem='3200MB',wfx=True,extra_label=
             output_to_gjf(rot_file,rot_geom,esm=esm,basis_set=basis,add_label=extra_label,
                          n_procs=n_procs,mem=mem,charge=charge,multiplicity=multiplicity,wfx=wfx)
     return
+
+# def _angle_btw_bcp(xyzA,xyzB,atomXYZ=np.array([0.,0.,0.])):
+#     """find angle between two bcp orientation vectors defined by x,y,z np.array, after flattening to yz plane."""
+#     xyzA[0], xyzA[1], xyzA[2] = [xyzA[0]-atomXYZ[0], xyzA[1]-atomXYZ[1], xyzA[2]-atomXYZ[2]]
+#     xyzB[0], xyzB[1], xyzB[2] = [xyzB[0]-atomXYZ[0], xyzB[1]-atomXYZ[1], xyzB[2]-atomXYZ[2]]
+#     angle= math.acos((xyzA[0]*xyzB[0]+xyzA[1]*xyzB[1]+xyzA[2]*xyzB[2])/(math.sqrt(xyzA[0]**2+xyzA[1]**2+xyzA[2]**2)*math.sqrt(xyzB[0]**2+xyzB[1]**2+xyzB[2]**2)))
+#     return angle
+
+#commented out - have included reference bcps at data at top of file rather tahn calculating each time
+# def _get_ref_bcps(sumfilenoext,atPairList,originAtom,originAtomXYZ=np.array([0.,0.,0.])):
+#     """given reference sumfile, extract bcp properties for needed bcps"""
+#     sumFile = open(sumfilenoext+".sum","r") #open file, read lines, close file
+#     data = sumFile.readlines()
+#     sumFile.close()
+#     bcpDict = {}
+#     for bcp in atPairList:
+#         #block = qt.get_bcp_block(data,bcp)
+#         bcpDict.update({'{at1}-{at2}'.format(at1=bcp[0],at2=bcp[1]):qt.get_bcp_properties(data,bcp)})
+#     clockbcpDict = _find_clockwise_rot(bcpDict,originAtom,originAtomXYZ)    
+#     return clockbcpDict  
