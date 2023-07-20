@@ -255,26 +255,26 @@ def _get_bcp_reference(originAtom,numBonds):
         retDict = _REFERENCE_MAP['C']['sp2']
         #note linear shouldn't get to this point
     elif originAtom =='B' and numBonds==3: #planar boron
-        print('planar boron')
+        # print('planar boron')
         retDict = _REFERENCE_MAP['B']['sp2']
     elif originAtom =='B' and numBonds==4: #sp3 boron
-        print('sp3 boron')
+        # print('sp3 boron')
         retDict = _REFERENCE_MAP['B']['sp3']
     elif originAtom == 'N' and numBonds==4:
-        print('ammonium')
+        # print('ammonium')
         retDict = _REFERENCE_MAP['N']['sp3']
     # elif originAtom =='Al' and numBonds==3: #planar boron
     #     print('planar aluminum')
     # elif originAtom =='Al' and numBonds==4: #sp3 boron
     #     print('sp3 aluminum') 
     elif originAtom =='Si' and numBonds==4: #sp3 carbon
-        print('sp3 silicon')
+        # print('sp3 silicon')
         retDict = _REFERENCE_MAP['Si']['sp3']
     elif originAtom =='Si' and numBonds==3: #sp2 carbon
-        print('sp2 silicon')
+        # print('sp2 silicon')
         retDict = _REFERENCE_MAP['Si']['sp2']
     elif originAtom == 'P' and numBonds==4:
-        print('phosphonium')
+        # print('phosphonium')
         retDict = _REFERENCE_MAP['P']['sp3']
     return retDict 
 
@@ -316,29 +316,32 @@ def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel):
 
     #find bcps connected to origin atom that are not the -x axis atom
     originBCPs = qt._find_connected(data,negXAtomLabel,originAtomLabel)
-    print(originBCPs)
+    # print(originBCPs)
     bcpPropDict = {}
     #get the bcp properties
     for bcp in originBCPs:
         #bcpBlock = qt.lock()
         bcpPropDict.update({bcp[0]+'-'+bcp[1]: qt.get_bcp_properties(data,atPair=bcp)})
-    print(bcpPropDict)    
-    clockwiseKeys = _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ)
+    # print(bcpPropDict)
+    if len(bcpPropDict) == 2:
+        clockwiseKeys = []
+    else:
+        clockwiseKeys = _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ)
     #at this point have bcpDictionary ordered from 1st to last with clockwise bcp
     return clockwiseKeys #this is a dictionary of bcps
 
-# def _angle_btw_bcp(xyzA,xyzB):
+# def _angle_btw_bcp(xyzA,xyzB,atomXYZ=np.array([0.,0.,0.])):
 #     """find angle between two bcp orientation vectors defined by x,y,z np.array, after flattening to yz plane."""
-#     xyzA[0] = 0.0
-#     xyzB[0]=0.0
+#     xyzA[0], xyzA[1], xyzA[2] = [xyzA[0]-atomXYZ[0], xyzA[1]-atomXYZ[1], xyzA[2]-atomXYZ[2]]
+#     xyzB[0], xyzB[1], xyzB[2] = [xyzB[0]-atomXYZ[0], xyzB[1]-atomXYZ[1], xyzB[2]-atomXYZ[2]]
 #     angle= math.acos((xyzA[0]*xyzB[0]+xyzA[1]*xyzB[1]+xyzA[2]*xyzB[2])/(math.sqrt(xyzA[0]**2+xyzA[1]**2+xyzA[2]**2)*math.sqrt(xyzB[0]**2+xyzB[1]**2+xyzB[2]**2)))
 #     return angle
 
 def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,0.0,0.0])):
     """given dictionary of bcp properties, find which ones are in a clockwise rotation"""
     #return list of dictionary keys ordered for clockwise rotation
-    print(bcpPropDict)
-    print(originAtomLabel)
+    # print(bcpPropDict)
+    # print(originAtomLabel)
     crossDict = {}
     for key1 in bcpPropDict:
         print(key1)
@@ -349,8 +352,7 @@ def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,
                 xyz1[0] = 0.#project to yz plane
                 xyz2=bcpPropDict[key2]['xyz']
                 xyz2[0]=0.
-                #MODIFY HERE FOR SHIFTING ORIGIN
-                cross=np.cross(bcpPropDict[key1]['xyz'],bcpPropDict[key2]['xyz'])[0]
+                cross=np.cross(np.subtract(bcpPropDict[key1]['xyz'],originAtomXYZ),np.subtract(bcpPropDict[key2]['xyz']),originAtomXYZ)[0]
                 if cross < 0:
                     isClockwise = True
                 else:
@@ -452,14 +454,15 @@ def _set_xaxis(xyzArray,negXAtom):
 #         G = np.array([[d,s,0],[-s,d,0],[0,0,1]])
     t_rot1 = _zero_y_for_negx(t_xyz,negXAtom)
     rot1_lengths = _get_lengths(t_rot1.T)
-    
     if np.any((rot1_lengths - initial_lengths)>tol):
         print("Geometry perturbation exceeded")
+        raise AssertionError('Geometry change after rotation exceeded tolerance')
     t_rot2 = _zero_z_for_negx(t_rot1,negXAtom)
     rot2_lengths = _get_lengths(t_rot2.T)
     
     if np.any((rot2_lengths - initial_lengths)>tol):
         print("Geometry perturbation exceeded")
+        raise AssertionError('Geometry change after rotation exceeded tolerance')
     if t_rot2[0,negXAtom-1] > 0: #if negxatom is along +x, rotate 180
         G = np.array([[-1,0,0],[0,1,0],[0,0,-1]])
         t_rot_final = np.matmul(G,t_rot2)
@@ -528,7 +531,7 @@ def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_sta
     """returns point to put on +y axis matching definition in rotate_substituent."""
     ccProps = qt.get_cc_props(sumFileNoExt,attachedAtom)    
     if len(ccProps) > 0:
-        vscc = qt._identify_vscc(ccProps,atomDict)
+        vscc = qt.identify_vscc(ccProps,atomDict)
     else:
         vscc = {} 
     if len(vscc) == 1:
@@ -539,7 +542,7 @@ def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_sta
         vkeys = list(vscc.keys())
         
         posYPoint = (vscc[vkeys[0]]['xyz'] + vscc[vkeys[1]]['xyz'])/2
-        print(posYPoint)
+        # print(posYPoint)
         #reorient to average of vscc points for +y
     else:
         #refDict = _get_reference_map()
@@ -550,20 +553,26 @@ def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_sta
         #data,originAtomXYZ,negXAtomLabel,originAtomLabel
         bcpsToMatch = _find_bcp_match(data,atomDict[attachedAtom]['xyz'],negXAtomLabel,attachedAtom)
         numBonds=len(bcpsToMatch)+1
-        atType = ''.join([i for i in attachedAtom if not i.isdigit()])
-        matchDict = _get_bcp_reference(atType,numBonds)
-        if default_stats:
-            statDict = _DEFAULT_STAT_DICT
-        posYPoint = _align_dicts(bcpsToMatch,matchDict,statDict)
+        #on the assumption that if an atom has two bonds (_find_bap_match returns None), 
+        # and does not have a lone pair, it is linear, so we do not do another rotation 
+        # and posYPoint is None
+        if len(bcpsToMatch) > 0:
+            posYPoint = []
+        else:
+            atType = ''.join([i for i in attachedAtom if not i.isdigit()])
+            matchDict = _get_bcp_reference(atType,numBonds)
+            if default_stats:
+                statDict = _DEFAULT_STAT_DICT
+            posYPoint = _align_dicts(bcpsToMatch,matchDict,statDict)
         #reorient to another point
         #posy point will be the point that would lie along the y-axis in reference in maximal match case
-        print('not done yet')
+        # print('not done yet')
     return posYPoint    
 
 def _set_yaxis(xyzArray,posYArray):
     """rotate a geom positioned on -x axis so posYArray will lie on +y"""
     theta = math.atan2(posYArray[2],posYArray[1])
-    print(theta)
+    # print(theta)
     c = math.cos(theta)
     s = math.sin(theta)
     G = np.array([[1,0,0],[0,c,s],[0,-s,c]])
@@ -679,7 +688,10 @@ def rotate_substituent(sumFileNoExt,originAtom,negXAtom,posYAtom=0):
         posYPoint = molecule_xaxis[posYAtom-1] 
     else:    
         posYPoint = _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel)
-    final_orientation = _set_yaxis(molecule_xaxis,posYPoint)
+    if len(posYPoint) > 0:    
+        final_orientation = _set_yaxis(molecule_xaxis,posYPoint)
+    else:
+        final_orientation = molecule_xaxis    
     #Generate output
     outFrame = pd.DataFrame(final_orientation*0.529177,columns = ['x','y','z'])
     outFrame['Atom'] = molecule_xyz['Atoms']
@@ -724,7 +736,7 @@ def output_to_gjf(old_file_name,reor_geom,esm='wB97XD',basis_set="aug-cc-pvtz",a
     new_file_name =old_file_name+'_reor'+add_label
     #delete file if already exists
     if os.path.exists(new_file_name+'.gjf'):
-        print('deleting')
+        # print('deleting')
         os.remove(new_file_name+'.gjf')
     with open(new_file_name+'.gjf', 'a') as f:
         f.write("%chk={chk}\n".format(chk=new_file_name+'.chk'))
