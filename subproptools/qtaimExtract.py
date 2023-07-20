@@ -1,3 +1,21 @@
+"""qtaimExtract
+Tools for extracting data from sum files(and CC from agpviz), and calculating substituent properties specifically
+
+Authors
+Kevin Lefrancois-Gagnon
+Robert C. Mawhinney
+
+User facing functions
+* get_sub_di - gets delocalization index between a substituent and the rest of the molecule
+* get bcp_properties - returns a dictionary of bcp properties for a given bcp
+* get_atomic_props - returns dictionary of atomic properties for all atoms in molecule
+* get_cc_props - returns dictionary of properties for all charge concentrations
+* identify_vscc - returns only the VSCC from a set of charge concentrations
+* get_sub_props - returns dictionary of one substituent's properties
+* extract_sub_props - returns dictionary of atomic, group, bcp and vscc properties for a substituent
+* sub_prop_frame - returns dictioanry of frames of group properties
+* get_xyz - extracts a molecule's xyz geometry from sum file
+"""
 import os # file system stuff
 import pandas as pd #data frames
 import math #sqrt
@@ -266,7 +284,7 @@ def _find_closest_nuclei(xyz,atomDict):
     #return atList with indices of npDistList that are equal to the two lowest values
     return [atList[np.where(npDistList==minDist[0])[0][0]],atList[np.where(npDistList==minDist[1])[0][0]]]
 
-def _identify_vscc(multiccDict,atomDict, thresh=0.7):
+def identify_vscc(multiccDict,atomDict, thresh=0.7):
     """Given dictionary of charge concentraion properties and atomic properties, identify vscc
     
     Args:
@@ -614,7 +632,7 @@ def extract_sub_props(data:list[str],subAtoms:list[int],sumFileNoExt:str,groupPr
         vsccProps={}
         for atom in lapRhoCpAtoms:#for each atom requested, get lapRhoCps
             allCC = get_cc_props(sumFileNoExt,atomList[atom-1])
-            vsccProps.update({atomList[atom-1]: _identify_vscc(allCC,atomicProps)})
+            vsccProps.update({atomList[atom-1]: identify_vscc(allCC,atomicProps)})
     else:
         vsccProps={"VSCC Props not requested"}
     #create output dictionary to return all requested properties, if a property not requested return a string stating that    
