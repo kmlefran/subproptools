@@ -94,7 +94,7 @@ def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel):
         #bcpBlock = qt.lock()
         bcpPropDict.update({bcp[0]+'-'+bcp[1]: qt.get_bcp_properties(data,atPair=bcp)})
     # print(bcpPropDict)
-    if len(bcpPropDict) == 2:
+    if len(bcpPropDict) <= 2:
         clockwiseKeys = []
     else:
         clockwiseKeys = _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ)
@@ -306,7 +306,7 @@ def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_sta
         #on the assumption that if an atom has two bonds (_find_bap_match returns None), 
         # and does not have a lone pair, it is linear, so we do not do another rotation 
         # and posYPoint is None
-        if len(bcpsToMatch) > 0:
+        if len(bcpsToMatch) == 0:
             posYPoint = []
         else:
             atType = ''.join([i for i in attachedAtom if not i.isdigit()])
