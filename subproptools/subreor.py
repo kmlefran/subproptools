@@ -54,8 +54,8 @@ def _get_bcp_reference(originAtom,numBonds):
     elif originAtom == 'N' and numBonds==4:
         # print('ammonium')
         retDict = _REFERENCE_MAP['N']['sp3']
-    # elif originAtom =='Al' and numBonds==3: #planar boron
-    #     print('planar aluminum')
+    elif originAtom =='Al' and numBonds==3: #planar aluminum
+        retDict = _REFERENCE_MAP['Al']['sp2']
     # elif originAtom =='Al' and numBonds==4: #sp3 boron
     #     print('sp3 aluminum') 
     elif originAtom =='Si' and numBonds==4: #sp3 carbon
@@ -116,7 +116,7 @@ def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,
                 xyz1[0] = 0.#project to yz plane
                 xyz2=bcpPropDict[key2]['xyz']
                 xyz2[0]=0.
-                cross=np.cross(np.subtract(bcpPropDict[key1]['xyz'],originAtomXYZ),np.subtract(bcpPropDict[key2]['xyz']),originAtomXYZ)[0]
+                cross=np.cross(np.subtract(bcpPropDict[key1]['xyz'],originAtomXYZ),np.subtract(bcpPropDict[key2]['xyz'],originAtomXYZ))[0]
                 if cross < 0:
                     isClockwise = True
                 else:
@@ -516,14 +516,14 @@ def rotate_sheet(csv_file,esm,basis,n_procs=4,mem='3200MB',wfx=True,extra_label=
 #     return angle
 
 #commented out - have included reference bcps at data at top of file rather tahn calculating each time
-# def _get_ref_bcps(sumfilenoext,atPairList,originAtom,originAtomXYZ=np.array([0.,0.,0.])):
-#     """given reference sumfile, extract bcp properties for needed bcps"""
-#     sumFile = open(sumfilenoext+".sum","r") #open file, read lines, close file
-#     data = sumFile.readlines()
-#     sumFile.close()
-#     bcpDict = {}
-#     for bcp in atPairList:
-#         #block = qt.get_bcp_block(data,bcp)
-#         bcpDict.update({'{at1}-{at2}'.format(at1=bcp[0],at2=bcp[1]):qt.get_bcp_properties(data,bcp)})
-#     clockbcpDict = _find_clockwise_rot(bcpDict,originAtom,originAtomXYZ)    
-#     return clockbcpDict  
+def _get_ref_bcps(sumfilenoext,atPairList,originAtom,originAtomXYZ=np.array([0.,0.,0.])):
+    """given reference sumfile, extract bcp properties for needed bcps"""
+    sumFile = open(sumfilenoext+".sum","r") #open file, read lines, close file
+    data = sumFile.readlines()
+    sumFile.close()
+    bcpDict = {}
+    for bcp in atPairList:
+        #block = qt.get_bcp_block(data,bcp)
+        bcpDict.update({'{at1}-{at2}'.format(at1=bcp[0],at2=bcp[1]):qt.get_bcp_properties(data,bcp)})
+    clockbcpDict = _find_clockwise_rot(bcpDict,originAtom,originAtomXYZ)    
+    return clockbcpDict  
