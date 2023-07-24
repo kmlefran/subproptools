@@ -109,7 +109,11 @@ def _get_table(data,tableHeader,ignored=0,endString='Total'):
     
     for i,line in enumerate(tableData):
         #print(line)
-        table.loc[i] = line.split()
+        n_col = len(headerNames)
+        split_line = line.split()
+        if 'Vol' in line and len(split_line) < n_col:
+            split_line.insert(1,None)
+        table.loc[i] = split_line
         
     return table    
 
