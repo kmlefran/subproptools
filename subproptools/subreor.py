@@ -108,9 +108,9 @@ def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,
 
     crossDict = {}
     for key1 in bcpPropDict:
-        print(key1)
+        # print(key1)
         for key2 in bcpPropDict:
-            print(key2)
+            # print(key2)
             if key1 != key2:
                 xyz1 = bcpPropDict[key1]['xyz']
                 xyz1[0] = 0.#project to yz plane
@@ -143,7 +143,7 @@ def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,
         ordered_bcp_props = {}
         for order in reordered_dict:
             for bcp in bcpPropDict:
-                print(bcp)
+                # print(bcp)
                 if reordered_dict[order]['Start'] in bcp:
                     ordered_bcp_props.update({bcp:bcpPropDict[bcp]})
                     continue
@@ -169,16 +169,16 @@ def _get_lengths(xyzArray):
 def _zero_y_for_negx(t_xyz,negXAtom):
     """perform first rotation in setting -x axis to zero the y value"""
     if t_xyz[0,negXAtom-1] == 0 and t_xyz[1,negXAtom-1] == 0: #on xy
-        print('hi')
+        # print('hi')
         G= np.array([[0.,0.,1.],[0.,1.,0.],[-1.,0.,0.]])
     elif t_xyz[1,negXAtom-1] == 0 and t_xyz[2,negXAtom-1] == 0: #already on x axis atom 2 y and z=0
-        print('here')
+        # print('here')
         G = np.array([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]])
     elif t_xyz[0,negXAtom-1] == 0 and t_xyz[2,negXAtom-1] == 0:
-        print('ho there')
+        # print('ho there')
         G = np.array([[0.,1.,0.],[-1.,0.,0.],[0.,0.,1.]])
     else:
-        print('no way')
+        # print('no way')
         d = t_xyz[0,negXAtom-1]/math.sqrt(t_xyz[0,negXAtom-1]**2 + t_xyz[1,negXAtom-1]**2)
         s = t_xyz[1,negXAtom-1]/math.sqrt(t_xyz[0,negXAtom-1]**2 + t_xyz[1,negXAtom-1]**2)
         G = np.array([[d,s,0.],[-s,d,0.],[0.,0.,1.]])
@@ -202,13 +202,11 @@ def _set_xaxis(xyzArray,negXAtom):
     t_rot1 = _zero_y_for_negx(t_xyz,negXAtom)
     rot1_lengths = _get_lengths(t_rot1.T)
     if np.any((rot1_lengths - initial_lengths)>tol):
-        print("Geometry perturbation exceeded")
         raise AssertionError('Geometry change after rotation exceeded tolerance')
     t_rot2 = _zero_z_for_negx(t_rot1,negXAtom)
     rot2_lengths = _get_lengths(t_rot2.T)
     
     if np.any((rot2_lengths - initial_lengths)>tol):
-        print("Geometry perturbation exceeded")
         raise AssertionError('Geometry change after rotation exceeded tolerance')
     if t_rot2[0,negXAtom-1] > 0: #if negxatom is along +x, rotate 180
         G = np.array([[-1,0,0],[0,1,0],[0,0,-1]])
@@ -503,7 +501,9 @@ def rotate_sheet(csv_file,esm,basis,n_procs=4,mem='3200MB',wfx=True,extra_label=
         posYAtom = csvFrame['posYAtom'][sub]
         for label in range(6,ncolumns):
             rot_file = csvFrame.iloc[sub,label]
+            print(f"""Rotating {rot_file}""")
             rot_geom = rotate_substituent(rot_file,originAtom=originAtom,negXAtom=negXAtom,posYAtom=posYAtom)
+            print(f"""Creating new Gaussian gjf for {rot_file}""")
             output_to_gjf(rot_file,rot_geom,esm=esm,basis_set=basis,add_label=extra_label,
                          n_procs=n_procs,mem=mem,charge=charge,multiplicity=multiplicity,wfx=wfx)
     return

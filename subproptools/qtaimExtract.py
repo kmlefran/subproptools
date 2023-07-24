@@ -105,7 +105,7 @@ def _get_table(data,tableHeader,ignored=0,endString='Total'):
     #Initialize empty data frame    
     table = pd.DataFrame(columns=headerNames)
     #Add each row of table to Data Frame
-    print(headerNames)
+    # print(headerNames)
     
     for i,line in enumerate(tableData):
         #print(line)
@@ -119,7 +119,7 @@ def _get_bcp_block(data,atPair=["C1","H2"]):
     #Start -1 from the search line, because the coords are the line before
     bcpStart = _search_str(data,word='Type = (3,-1) BCP {at1} {at2}'.format(at1=atPair[0],at2=atPair[1]))-1
     if bcpStart == -2:
-        print('didnt find first')
+        # print('didnt find first')
         bcpStart = _search_str(data,word='Type = (3,-1) BCP {at1} {at2}'.format(at1=atPair[1],at2=atPair[0]))-1
     if bcpStart == -2:
         raise ValueError('BCP between {a1} and {a2} not found in file'.format(a1=atPair[0], a2=atPair[1]))   
