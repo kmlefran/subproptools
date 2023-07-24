@@ -653,7 +653,8 @@ def _find_connected(data,negXAtomLabel,originAtomLabel):
     #find all atoms to which bonded
     bcpLines=[]
     for line in data:
-        if 'Type = (3,-1)' in line and negXAtomLabel not in line and originAtomLabel in line:
+        split_line = line.split()
+        if '(3,-1)' in split_line and negXAtomLabel not in split_line and originAtomLabel in split_line:
             bcpLines.append(line)
     bcpList = []        
     for bcp in bcpLines:
