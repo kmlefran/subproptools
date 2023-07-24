@@ -106,13 +106,13 @@ def _get_table(data,tableHeader,ignored=0,endString='Total'):
     table = pd.DataFrame(columns=headerNames)
     #Add each row of table to Data Frame
     # print(headerNames)
-    
+    n_col = len(headerNames)
     for i,line in enumerate(tableData):
         #print(line)
-        n_col = len(headerNames)
+        
         split_line = line.split()
-        if 'Vol' in line and len(split_line) < n_col:
-            split_line.insert(1,None)
+        if 'Vol' in tableHeader and len(split_line) < n_col:
+            split_line.insert(1,0.)
         table.loc[i] = split_line
         
     return table    
