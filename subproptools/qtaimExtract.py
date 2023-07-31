@@ -288,7 +288,18 @@ def _find_closest_nuclei(xyz,atomDict):
     #return atList with indices of npDistList that are equal to the two lowest values
     return [atList[np.where(npDistList==minDist[0])[0][0]],atList[np.where(npDistList==minDist[1])[0][0]]]
 
-def identify_vscc(multiccDict,atomDict, thresh=0.7):
+def _is_bonded_cc(ccXYZ,atomDict,originAtom):
+    atom_labels = atomDict.keys()
+    on_a_line=False
+    for a_1 in atom_labels:
+        if a_1 != originAtom:
+            if _is_on_line(atomDict[a_1]['xyz'], atomDict[originAtom]['xyz'],ccXYZ):
+                on_a_line = True
+                break
+   
+    return on_a_line
+
+def identify_vscc(multiccDict,atomDict,originAtom, thresh=0.7):
     """Given dictionary of charge concentraion properties and atomic properties, identify vscc
     
     Args:
@@ -309,10 +320,11 @@ def identify_vscc(multiccDict,atomDict, thresh=0.7):
     for cc in multiccDict: #for each cc
         if multiccDict[cc]['distFromNuc'] > 0.1: # this will filter out the innermost cc that are on the nuclei
             ccXYZ = multiccDict[cc]['xyz'] #get the xyz coords of the cc
-            nucPair = _find_closest_nuclei(ccXYZ,atomDict) #find the two closest atoms to the cc
+            # nucPair = _find_closest_nuclei(ccXYZ,atomDict) #find the two closest atoms to the cc
             #if it is a bonded cc, it will be the nuclei to which it is bonded
             #check if the cc is on the bond between those two nuclei
-            isBonded = _is_on_line(atomDict[nucPair[0]]['xyz'],atomDict[nucPair[1]]['xyz'],ccXYZ)
+            # isBonded = _is_on_line(atomDict[nucPair[0]]['xyz'],atomDict[nucPair[1]]['xyz'],ccXYZ)
+            isBonded = _is_bonded_cc(ccXYZ,atomDict,originAtom)
             if not isBonded: #if it is not on the line, it is potentially a VSCC, store it, and its distance
                 nucDistList.append(multiccDict[cc]['distFromNuc'])
                 potentialccList.append(cc)

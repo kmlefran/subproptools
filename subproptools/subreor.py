@@ -281,7 +281,7 @@ def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_sta
     """returns point to put on +y axis matching definition in rotate_substituent."""
     ccProps = qt.get_cc_props(sumFileNoExt,attachedAtom)    
     if len(ccProps) > 0:
-        vscc = qt.identify_vscc(ccProps,atomDict)
+        vscc = qt.identify_vscc(ccProps,atomDict,attachedAtom)
     else:
         vscc = {} 
     if len(vscc) == 1:
