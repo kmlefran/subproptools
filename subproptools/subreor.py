@@ -54,6 +54,9 @@ def _get_bcp_reference(originAtom,numBonds):
     elif originAtom == 'N' and numBonds==4:
         # print('ammonium')
         retDict = _REFERENCE_MAP['N']['sp3']
+    elif originAtom == 'N' and numBonds==3:
+        # print('ammonium')
+        retDict = _REFERENCE_MAP['N']['sp2']
     elif originAtom =='Al' and numBonds==3: #planar aluminum
         retDict = _REFERENCE_MAP['Al']['sp2']
     # elif originAtom =='Al' and numBonds==4: #sp3 boron
@@ -67,6 +70,10 @@ def _get_bcp_reference(originAtom,numBonds):
     elif originAtom == 'P' and numBonds==4:
         # print('phosphonium')
         retDict = _REFERENCE_MAP['P']['sp3']
+    elif originAtom == 'Se' and numBonds==4:
+        retDict = _REFERENCE_MAP['Se']['sp3']
+    elif originAtom == 'As' and numBonds == 4:
+        retDict = _REFERENCE_MAP['As']['sp3']        
     return retDict 
 
 def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel):

@@ -1,0 +1,21 @@
+%chk=SubH_SeMeONH_wb97xd_aug-cc-pvtz_reor.chk
+%nprocs=4
+%mem=3200MB
+#p wB97XD/aug-cc-pvtz output=wfx nosymmetry
+
+single point on SubH_SeMeONH_wb97xd_aug-cc-pvtz reoriented by subproptools
+
+0 1
+Se1  0.000000  0.000000e+00  0.000000e+00
+ H2 -1.507627  2.517048e-18 -6.342507e-18
+ C3  0.319966  1.883361e+00  8.740442e-17
+ H4 -0.087098  2.294366e+00  9.190371e-01
+ H5  1.398934  2.003766e+00 -3.533253e-02
+ H6 -0.152772  2.300235e+00 -8.842304e-01
+ O7  0.396323 -6.433982e-01 -1.425664e+00
+ N8  0.653089 -4.807445e-01  1.477482e+00
+ H9  0.617556 -1.496789e+00  1.529814e+00
+
+SubH_SeMeONH_wb97xd_aug-cc-pvtz_reor.wfx
+
+
