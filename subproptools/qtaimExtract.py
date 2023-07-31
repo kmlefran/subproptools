@@ -648,7 +648,7 @@ def extract_sub_props(data:list[str],subAtoms:list[int],sumFileNoExt:str,groupPr
         vsccProps={}
         for atom in lapRhoCpAtoms:#for each atom requested, get lapRhoCps
             allCC = get_cc_props(sumFileNoExt,atomList[atom-1])
-            vsccProps.update({atomList[atom-1]: identify_vscc(allCC,atomicProps)})
+            vsccProps.update({atomList[atom-1]: identify_vscc(allCC,atomicProps,atom)})
     else:
         vsccProps={"VSCC Props not requested"}
     #create output dictionary to return all requested properties, if a property not requested return a string stating that    
