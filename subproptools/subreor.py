@@ -76,7 +76,7 @@ def _get_bcp_reference(originAtom,numBonds):
         retDict = _REFERENCE_MAP['As']['sp3']        
     return retDict 
 
-def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel):
+def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel,atomDict):
     """
     Finds the atoms connected to the origin atom, and arranges the BCPs in a clockwise sense
     (assuming -x atom going into page)
@@ -104,26 +104,31 @@ def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel):
     if len(bcpPropDict) <= 2:
         clockwiseKeys = []
     else:
-        clockwiseKeys = _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ)
+        clockwiseKeys = _find_clockwise_rot(bcpPropDict,originAtomLabel,negXAtomLabel,atomDict,originAtomXYZ)
     #at this point have bcpDictionary ordered from 1st to last with clockwise bcp
     return clockwiseKeys #this is a dictionary of bcps
 
 
-def _find_clockwise_rot(bcpPropDict,originAtomLabel,originAtomXYZ=np.array([0.0,0.0,0.0])):
+def _find_clockwise_rot(bcpPropDict,originAtomLabel,negXAtomLabel,atomDict,originAtomXYZ=np.array([0.0,0.0,0.0])):
     """given dictionary of bcp properties, find which ones are in a clockwise rotation"""
     #return list of dictionary keys ordered for clockwise rotation
-
     crossDict = {}
+    atoms = list(atomDict.keys())
+    neg_x_index = atoms.index(negXAtomLabel)
     for key1 in bcpPropDict:
-        # print(key1)
+    # print(key1)
         for key2 in bcpPropDict:
             # print(key2)
             if key1 != key2:
-                xyz1 = bcpPropDict[key1]['xyz']
-                xyz1[0] = 0.#project to yz plane
-                xyz2=bcpPropDict[key2]['xyz']
-                xyz2[0]=0.
-                cross=np.cross(np.subtract(bcpPropDict[key1]['xyz'],originAtomXYZ),np.subtract(bcpPropDict[key2]['xyz'],originAtomXYZ))[0]
+                to_rotate = np.vstack((originAtomXYZ,atomDict[negXAtomLabel]['xyz'],bcpPropDict[key1]['xyz'],bcpPropDict[key2]['xyz']))
+                orig_geom = _set_origin(to_rotate,1)
+                rot_geom = _set_xaxis(orig_geom,neg_x_index+1)
+                zero_3d = np.array([0.0,0.0,0.0])
+                bcp_1_xyz = rot_geom[2]
+                bcp_2_xyz = rot_geom[3]
+                bcp_2_xyz[0] = 0.
+                bcp_1_xyz[0] = 0.
+                cross=np.cross(bcp_1_xyz,bcp_2_xyz)[0]
                 if cross < 0:
                     isClockwise = True
                 else:
@@ -306,7 +311,7 @@ def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_sta
         sumFile.close()
         #bcpsToMatch is bcp dictionary, ordered for clockwise rot
         #data,originAtomXYZ,negXAtomLabel,originAtomLabel
-        bcpsToMatch = _find_bcp_match(data,atomDict[attachedAtom]['xyz'],negXAtomLabel,attachedAtom)
+        bcpsToMatch = _find_bcp_match(data,atomDict[attachedAtom]['xyz'],negXAtomLabel,attachedAtom,atomDict)
         numBonds=len(bcpsToMatch)+1
         #on the assumption that if an atom has two bonds (_find_bap_match returns None), 
         # and does not have a lone pair, it is linear, so we do not do another rotation 
@@ -523,14 +528,15 @@ def rotate_sheet(csv_file,esm,basis,n_procs=4,mem='3200MB',wfx=True,extra_label=
 #     return angle
 
 #commented out - have included reference bcps at data at top of file rather tahn calculating each time
-def _get_ref_bcps(sumfilenoext,atPairList,originAtom,originAtomXYZ=np.array([0.,0.,0.])):
+def _get_ref_bcps(sumfilenoext,atPairList,originAtom,negXAtomLabel,originAtomXYZ=np.array([0.,0.,0.])):
     """given reference sumfile, extract bcp properties for needed bcps"""
     sumFile = open(sumfilenoext+".sum","r") #open file, read lines, close file
     data = sumFile.readlines()
     sumFile.close()
+    atomDict = qt.get_atomic_props(data)
     bcpDict = {}
     for bcp in atPairList:
         #block = qt.get_bcp_block(data,bcp)
         bcpDict.update({'{at1}-{at2}'.format(at1=bcp[0],at2=bcp[1]):qt.get_bcp_properties(data,bcp)})
-    clockbcpDict = _find_clockwise_rot(bcpDict,originAtom,originAtomXYZ)    
+    clockbcpDict = _find_clockwise_rot(bcpDict,originAtom,negXAtomLabel,atomDict,originAtomXYZ)    
     return clockbcpDict  
