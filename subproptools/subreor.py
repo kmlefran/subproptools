@@ -73,7 +73,9 @@ def _get_bcp_reference(originAtom,numBonds):
     elif originAtom == 'Se' and numBonds==4:
         retDict = _REFERENCE_MAP['Se']['sp3']
     elif originAtom == 'As' and numBonds == 4:
-        retDict = _REFERENCE_MAP['As']['sp3']        
+        retDict = _REFERENCE_MAP['As']['sp3']
+    elif originAtom == 'Ge' and numBonds ==4:
+        retDict = _REFERENCE_MAP['Ge']['sp3']      
     return retDict 
 
 def _find_bcp_match(data,originAtomXYZ,negXAtomLabel, originAtomLabel,atomDict):
