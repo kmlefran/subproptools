@@ -126,7 +126,7 @@ def _find_clockwise_rot(bcpPropDict,originAtomLabel,negXAtomLabel,atomDict,origi
             if key1 != key2:
                 to_rotate = np.vstack((originAtomXYZ,atomDict[negXAtomLabel]['xyz'],bcpPropDict[key1]['xyz'],bcpPropDict[key2]['xyz']))
                 orig_geom = _set_origin(to_rotate,1)
-                rot_geom = _set_xaxis(orig_geom,neg_x_index+1)
+                rot_geom = _set_xaxis(orig_geom,2)
                 zero_3d = np.array([0.0,0.0,0.0])
                 bcp_1_xyz = rot_geom[2]
                 bcp_2_xyz = rot_geom[3]
