@@ -375,7 +375,7 @@ def _is_on_line(lineStartList,lineEndList,pointToCheckList,epsilon=0.1):
     else:
         return False
     
-def get_cc_props(filename,atomLabel,type='vscc'):
+def get_cc_props(filename,atomLabel,type='vscc',is_folder_data=False):
     """takes a sumfilename with no extension and an atom label that we want cc for (eg F4)
     returns dictionary of all cc for atomLabelwith all the (3,+3) cc and properties
     
@@ -391,15 +391,19 @@ def get_cc_props(filename,atomLabel,type='vscc'):
         Sub-dictionary keys include: xyz, rho, delsqrho, distFromNuc
     """
     #create path to subdirectory
-    currdir = os.getcwd()
-    #example dir name SubH_CCF-ReorPosY-B3LYP-def2-TZVPPD-Field_atomicfiles
-    subdirname = filename + "_atomicfiles"
-    pathToSubdir = currdir+ "/"+subdirname+"/"
     lowerAtomLabel = atomLabel.lower() #the laprhocp files are eg f4.agpviz - note lower case
-    #open the file, read data, and close file
-    atFile = open(pathToSubdir+lowerAtomLabel+".agpviz",'r')
-    atData = atFile.readlines()
-    atFile.close()
+    if not is_folder_data:
+        currdir = os.getcwd()
+        #example dir name SubH_CCF-ReorPosY-B3LYP-def2-TZVPPD-Field_atomicfiles
+        subdirname = filename + "_atomicfiles"
+        pathToSubdir = currdir+ "/"+subdirname+"/"
+        
+        #open the file, read data, and close file
+        atFile = open(pathToSubdir+lowerAtomLabel+".agpviz",'r')
+        atData = atFile.readlines()
+        atFile.close()
+    else:
+        atData = filename.get_object_content(lowerAtomLabel+".agpviz").split('\n')
     #initialize empty dict to store all cc
     allccDict = {}
     alldictcounter=1 #counter since the key will be numeric
@@ -678,6 +682,18 @@ def _find_connected(data,negXAtomLabel,originAtomLabel):
         bcpList.append([splitbcp[4],splitbcp[5]])
     return bcpList
 
+def _find_all_connections(data):
+    """find all pairs of atoms connected by a BCP"""
+    bcpLines=[]
+    for line in data:
+        split_line = line.split()
+        if '(3,-1)' in split_line:
+            bcpLines.append(line)
+    bcpList = []        
+    for bcp in bcpLines:
+        splitbcp = bcp.split()
+        bcpList.append([splitbcp[4],splitbcp[5]])
+    return bcpList   
 
 def sub_prop_frame(csvFile:str) -> dict:
     """Given csv file, extract group properties for all files included and store properties
@@ -768,7 +784,7 @@ def sub_prop_frame(csvFile:str) -> dict:
         all_label_dict.update({csvFrame.columns[col]: ind_label_dict })
     return all_label_dict         
 
-def get_xyz(sumfile:str) -> dict:
+def get_xyz(data) -> dict:
     """Given sumfile, return dicitonary containing xyzcoordinates and atom labels
     
     Args:
@@ -793,9 +809,7 @@ def get_xyz(sumfile:str) -> dict:
         (xn, yn, zn, float coordinates of atoms)
         'Atoms': ['C1','H2','H3','H4']}
     """
-    sumFile = open(sumfile+".sum","r") #open file, read lines, close file
-    data = sumFile.readlines()
-    sumFile.close()
+
     xyzTable = _get_table(data,'Charge                X                  Y                  Z',endString='Some Atomic Properties:')
     xyzTable['X'] = pd.to_numeric(xyzTable['X'],downcast='float')
     xyzTable['Y'] = pd.to_numeric(xyzTable['Y'],downcast='float')

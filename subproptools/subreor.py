@@ -293,6 +293,42 @@ def _align_dicts(testDict,refDict,statDict):
             posYPoint = testDict[testKeysList[1]]['xyz']
     return posYPoint    
 
+def _get_posy_point_aiida(data,FolderData,atomDict,attachedAtom,negXAtomLabel,default_stats=True):
+    ccProps = qt.get_cc_props(FolderData,attachedAtom,is_folder_data=True)
+    if len(ccProps) > 0:
+        vscc = qt.identify_vscc(ccProps,atomDict,attachedAtom)
+    else:
+        vscc = {} 
+    if len(vscc) == 1:
+        #reorient setting vscc to +y
+        vkeys = list(vscc.keys())
+        posYPoint = vscc[vkeys[0]]['xyz']
+    elif len(vscc) == 2 and "N" not in attachedAtom:
+        vkeys = list(vscc.keys())
+        
+        posYPoint = (vscc[vkeys[0]]['xyz'] + vscc[vkeys[1]]['xyz'])/2
+        #reorient to average of vscc points for +y
+    else:
+        #bcpsToMatch is bcp dictionary, ordered for clockwise rot
+        #data,originAtomXYZ,negXAtomLabel,originAtomLabel
+        bcpsToMatch = _find_bcp_match(data,atomDict[attachedAtom]['xyz'],negXAtomLabel,attachedAtom,atomDict)
+        numBonds=len(bcpsToMatch)+1
+        #on the assumption that if an atom has two bonds (_find_bap_match returns None), 
+        # and does not have a lone pair, it is linear, so we do not do another rotation 
+        # and posYPoint is None
+        if len(bcpsToMatch) == 0:
+            posYPoint = []
+        else:
+            atType = ''.join([i for i in attachedAtom if not i.isdigit()])
+            matchDict = _get_bcp_reference(atType,numBonds)
+            if default_stats:
+                statDict = _DEFAULT_STAT_DICT
+            posYPoint = _align_dicts(bcpsToMatch,matchDict,statDict)
+        #reorient to another point
+        #posy point will be the point that would lie along the y-axis in reference in maximal match case
+        # print('not done yet')
+    return posYPoint    
+
 def _get_posy_point(sumFileNoExt,atomDict,attachedAtom,negXAtomLabel,default_stats=True):
     """returns point to put on +y axis matching definition in rotate_substituent."""
     ccProps = qt.get_cc_props(sumFileNoExt,attachedAtom)    
@@ -361,6 +397,64 @@ def _get_popelier_dif(bcpDictA,bcpDictB,statDict):
             distancesq += (scaledA - scaledB)**2
     return math.sqrt(distancesq)    
 
+def rotate_substituent_aiida(SinglefileData,FolderData,originAtom,negXAtom,posYAtom=0):
+    """
+    Rotates a substituent to the defined coordinate system.
+
+    Coordinate system defined as: 
+        originAtom at (0,0,0)
+        negXAtom at (-x,0,0)
+        Atom on +y defined as:
+            * average of lone pairs for 2 lone pairs on originAtom
+            * Position of lone pair for 1 lone pair on originAtom
+            * For no lone pairs: map BCPs onto reference for the atom type
+            * Minimum distance in BCP space defined the atom to put on +y
+
+    Args:
+        sumFileNoExt (string): name of a sum file, without the .sum extension
+        originAtom (int): the integer number of the atom to place at the origin
+        negXAtom (int): the integer number of the atom to place along the -x axis
+        posYAtom (int): override for above defined +y point, set to posYAtom instead
+
+    Returns:
+        pandas data frame of output geometry (columns Atom, x, y, z)
+
+    Examples:
+        >>> rotate_substituent('SubCH3_CFH2_anti2146_reor',1,1)
+        Atom    x   y   z
+        C1      0.  0.  0.
+        H2 -{float} 0.  0.
+        .(remaining geometry)
+        .
+        .
+    """
+    #read sum file
+    data = SinglefileData.get_content().split('\n')
+    atomDict = qt.get_atomic_props(data) #(needed for VSCC identification)
+
+    molecule_xyz = qt.get_xyz(data)
+    #Labels format A1 etc
+    negXAtomLabel = molecule_xyz['Atoms'][negXAtom-1]
+    attachedAtom = molecule_xyz['Atoms'][originAtom-1]
+    #perform reorientation
+    molecule_orig = _set_origin(molecule_xyz['xyz'],originAtom)
+    molecule_xaxis = _set_xaxis(molecule_orig,negXAtom)
+    if posYAtom:
+        posYPoint = molecule_xaxis[posYAtom-1] 
+    else:    
+        posYPoint = _get_posy_point_aiida(data,FolderData,atomDict,attachedAtom,negXAtomLabel)
+    if len(posYPoint) > 0:    
+        final_orientation = _set_yaxis(molecule_xaxis,posYPoint)
+    else:
+        final_orientation = molecule_xaxis    
+    #Generate output
+    final_orientation = final_orientation*0.529177
+    # outFrame = pd.DataFrame(final_orientation*0.529177,columns = ['x','y','z'])
+    # outFrame['Atom'] = molecule_xyz['Atoms']
+    # outFrame = outFrame[['Atom','x','y','z']]
+    out_dict = {'Labels':molecule_xyz['Atoms'], 'Coordinates': final_orientation}
+    # out_dict = {molecule_xyz['Atoms'][i]:final_orientation[i] for i in range(0,len(molecule_xyz['Atoms']))}
+    return out_dict
 
 def rotate_substituent(sumFileNoExt,originAtom,negXAtom,posYAtom=0):
     """
@@ -399,7 +493,7 @@ def rotate_substituent(sumFileNoExt,originAtom,negXAtom,posYAtom=0):
     sumFile.close()
     atomDict = qt.get_atomic_props(data) #(needed for VSCC identification)
 
-    molecule_xyz = qt.get_xyz(sumFileNoExt)
+    molecule_xyz = qt.get_xyz(data)
     #Labels format A1 etc
     negXAtomLabel = molecule_xyz['Atoms'][negXAtom-1]
     attachedAtom = molecule_xyz['Atoms'][originAtom-1]
