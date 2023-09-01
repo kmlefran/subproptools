@@ -659,6 +659,29 @@ def extract_sub_props(data:list[str],subAtoms:list[int],sumFileNoExt:str,groupPr
     outDict = {'Group':subDict,'Atomic':atomicProps,'BCP':bcpProperties,'VSCC':vsccProps}    
     return outDict
 
+def get_selected_bcps(data,bcp_list):
+    bcpProperties = {} #initialize empty dictionary
+    for bcpPair in bcp_list:
+        prop = get_bcp_properties(data,bcpPair)
+        # prop.update({'DI(R,G)': [get_sub_di(data,subatomLabels)]})
+        # bcpPair[0] -= 1 # lists start from 0, indices would be passed from molecule
+        # bcpPair[1] -= 1 # which would start at 1, so adjust index
+        #bcpBlock=[] #reset bcpBlock so won't be copied into future loop if block unable to be found
+        #bcpBlock = _get_bcp_block(data, )
+        #add the bcp properties to the dictionary under the atom labels
+        # prop = get_bcp_properties(data,[atomList[i] for i in bcpPair])
+        # prop.update({'DI(R,G)': [get_sub_di(data,subatomLabels)]})
+        # for key in atomicProps:
+        #     if key == atomList[bcpPair[0]] or key == atomList[bcpPair[1]]:
+        #         if '1' in key:
+        #             keynum=1
+        #         elif '2' in key:
+        #             keynum=2
+        #         prop.update({'r(BCP-{at})'.format(at=keynum):[_get_dist(atomicProps[key]['xyz'],prop['xyz'])]})
+        bcpProperties.update({'{at1}-{at2}'.format(at1=bcpPair[0],at2=bcpPair[1]):prop })   
+    return bcpProperties
+
+
 def _find_connected(data,negXAtomLabel,originAtomLabel):
     """Given lines of sumfile, atom on -x label, and atom on origin Label, find atoms bonded to origin.
     Args:
