@@ -343,6 +343,12 @@ def identify_vscc(multiccDict,atomDict,originAtom, thresh=0.7):
             vsccDict.update({cc: multiccDict[cc]})
     return vsccDict    
 
+def get_atom_vscc(filename,atomLabel,type,atomicProps,is_lines_data=False):
+    # atomList = list(atomicProps.keys())
+    all_cc_dict = get_cc_props(filename,atomLabel,type,is_lines_data)
+    vscc_dict = identify_vscc(all_cc_dict,atomicProps,atomLabel)
+    return vscc_dict
+
 def _is_on_line(lineStartList,lineEndList,pointToCheckList,epsilon=0.1):
     """Given 3d coords for start of line, end of line and point to check, sees if pointToCheck is on line"""
     #line connecting atoms: (x1 + t(x2-x1),y1 + t(y2-y1),z1 + t(z2-z1))
@@ -375,7 +381,7 @@ def _is_on_line(lineStartList,lineEndList,pointToCheckList,epsilon=0.1):
     else:
         return False
     
-def get_cc_props(filename,atomLabel,type='vscc',is_folder_data=False):
+def get_cc_props(filename,atomLabel,type='vscc',is_lines_data=False):
     """takes a sumfilename with no extension and an atom label that we want cc for (eg F4)
     returns dictionary of all cc for atomLabelwith all the (3,+3) cc and properties
     
@@ -392,7 +398,7 @@ def get_cc_props(filename,atomLabel,type='vscc',is_folder_data=False):
     """
     #create path to subdirectory
     lowerAtomLabel = atomLabel.lower() #the laprhocp files are eg f4.agpviz - note lower case
-    if not is_folder_data:
+    if not is_lines_data:
         currdir = os.getcwd()
         #example dir name SubH_CCF-ReorPosY-B3LYP-def2-TZVPPD-Field_atomicfiles
         subdirname = filename + "_atomicfiles"
@@ -403,7 +409,7 @@ def get_cc_props(filename,atomLabel,type='vscc',is_folder_data=False):
         atData = atFile.readlines()
         atFile.close()
     else:
-        atData = filename.get_object_content(lowerAtomLabel+".agpviz").split('\n')
+        atData = filename
     #initialize empty dict to store all cc
     allccDict = {}
     alldictcounter=1 #counter since the key will be numeric
