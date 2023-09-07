@@ -293,12 +293,16 @@ def _align_dicts(testDict,refDict,statDict):
             posYPoint = testDict[testKeysList[1]]['xyz']
     return posYPoint    
 
-def _get_posy_point_aiida(data,FolderData,atomDict,attachedAtom,negXAtomLabel,default_stats=True):
-    ccProps = qt.get_cc_props(FolderData,attachedAtom,is_folder_data=True)
-    if len(ccProps) > 0:
-        vscc = qt.identify_vscc(ccProps,atomDict,attachedAtom)
-    else:
-        vscc = {} 
+def _get_posy_point_aiida(data,cc_dict,atomDict,attachedAtom,negXAtomLabel,default_stats=True):
+    # ccProps = qt.get_cc_props(FolderData,attachedAtom,is_folder_data=True)
+    for key in list(cc_dict.keys()):
+        keynum=int(''.join(filter(str.isdigit, key)))
+        if keynum==1:
+            vscc=cc_dict[key]
+    # if len(ccProps) > 0:
+    #     vscc = qt.identify_vscc(ccProps,atomDict,attachedAtom)
+    # else:
+    #     vscc = {} 
     if len(vscc) == 1:
         #reorient setting vscc to +y
         vkeys = list(vscc.keys())
@@ -397,7 +401,7 @@ def _get_popelier_dif(bcpDictA,bcpDictB,statDict):
             distancesq += (scaledA - scaledB)**2
     return math.sqrt(distancesq)    
 
-def rotate_substituent_aiida(SinglefileData,FolderData,originAtom,negXAtom,posYAtom=0):
+def rotate_substituent_aiida(sum_file_folder, atom_dict,cc_dict,originAtom=1,negXAtom=2,posYAtom=0):
     """
     Rotates a substituent to the defined coordinate system.
 
@@ -429,8 +433,8 @@ def rotate_substituent_aiida(SinglefileData,FolderData,originAtom,negXAtom,posYA
         .
     """
     #read sum file
-    data = SinglefileData.get_content().split('\n')
-    atomDict = qt.get_atomic_props(data) #(needed for VSCC identification)
+    data = sum_file_folder.get_object_content('aiida.sum').split('\n')
+    atomDict = atom_dict.get_dict() #(needed for VSCC identification)
 
     molecule_xyz = qt.get_xyz(data)
     #Labels format A1 etc
@@ -442,7 +446,7 @@ def rotate_substituent_aiida(SinglefileData,FolderData,originAtom,negXAtom,posYA
     if posYAtom:
         posYPoint = molecule_xaxis[posYAtom-1] 
     else:    
-        posYPoint = _get_posy_point_aiida(data,FolderData,atomDict,attachedAtom,negXAtomLabel)
+        posYPoint = _get_posy_point_aiida(data,cc_dict,atomDict,attachedAtom,negXAtomLabel)
     if len(posYPoint) > 0:    
         final_orientation = _set_yaxis(molecule_xaxis,posYPoint)
     else:
@@ -567,7 +571,7 @@ def output_to_gjf(old_file_name,reor_geom,esm='wB97XD',basis_set="aug-cc-pvtz",a
         f.write('\n')
         f.write('{q} {mul}\n'.format(q=charge,mul=multiplicity))
         dfAsString = reor_geom.to_string(header=False, index=False)
-        f.write(dfAsString)
+        f.write(dfAsString.split('NNA')[0])#NNAs are appended as last atom - don't write them
         f.write('\n\n')
         if wfx:
             f.write(new_file_name+'.wfx\n\n\n')
