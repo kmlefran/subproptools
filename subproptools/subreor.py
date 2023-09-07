@@ -456,7 +456,7 @@ def rotate_substituent_aiida(sum_file_folder, atom_dict,cc_dict,originAtom=1,neg
     # outFrame = pd.DataFrame(final_orientation*0.529177,columns = ['x','y','z'])
     # outFrame['Atom'] = molecule_xyz['Atoms']
     # outFrame = outFrame[['Atom','x','y','z']]
-    out_dict = {'Labels':molecule_xyz['Atoms'], 'Coordinates': final_orientation}
+    out_dict = {'atom_symbols':molecule_xyz['Atoms'], 'geom': final_orientation}
     # out_dict = {molecule_xyz['Atoms'][i]:final_orientation[i] for i in range(0,len(molecule_xyz['Atoms']))}
     return out_dict
 
