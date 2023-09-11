@@ -711,7 +711,7 @@ def _find_connected(data,negXAtomLabel,originAtomLabel):
         bcpList.append([splitbcp[4],splitbcp[5]])
     return bcpList
 
-def _find_all_connections(data):
+def find_all_connections(data):
     """find all pairs of atoms connected by a BCP"""
     bcpLines=[]
     for line in data:
