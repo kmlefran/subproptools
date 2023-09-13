@@ -1,2 +1,7 @@
-__version__ = '0.0.2'
-__author__ = 'Kevin Lefrancois-Gagnon'
+"""
+subproptools
+
+A plugin for extracting data from .sum files and manipuating them
+"""
+
+__version__ = "0.2.0"
