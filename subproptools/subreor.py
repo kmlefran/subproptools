@@ -434,7 +434,7 @@ def rotate_substituent_aiida(sum_file_folder, atom_dict,cc_dict,originAtom=1,neg
     """
     #read sum file
     data = sum_file_folder.get_object_content('aiida.sum').split('\n')
-    atomDict = atom_dict.get_dict() #(needed for VSCC identification)
+    atomDict = atom_dict #(needed for VSCC identification)
 
     molecule_xyz = qt.get_xyz(data)
     #Labels format A1 etc
@@ -456,7 +456,11 @@ def rotate_substituent_aiida(sum_file_folder, atom_dict,cc_dict,originAtom=1,neg
     # outFrame = pd.DataFrame(final_orientation*0.529177,columns = ['x','y','z'])
     # outFrame['Atom'] = molecule_xyz['Atoms']
     # outFrame = outFrame[['Atom','x','y','z']]
-    out_dict = {'atom_symbols':molecule_xyz['Atoms'], 'geom': final_orientation}
+    num_nna = len([x for x in molecule_xyz['Atoms'] if 'NNA' in x])
+    tot_num_ats = len(molecule_xyz['Atoms'])
+    non_nna_max_id = tot_num_ats - num_nna
+    out_dict = {'atom_symbols':molecule_xyz['Atoms'][0:non_nna_max_id], 'geom': final_orientation[0:non_nna_max_id]}
+    
     # out_dict = {molecule_xyz['Atoms'][i]:final_orientation[i] for i in range(0,len(molecule_xyz['Atoms']))}
     return out_dict
 
@@ -572,7 +576,10 @@ def output_to_gjf(old_file_name,reor_geom,esm='wB97XD',basis_set="aug-cc-pvtz",a
         f.write('{q} {mul}\n'.format(q=charge,mul=multiplicity))
         dfAsString = reor_geom.to_string(header=False, index=False)
         f.write(dfAsString.split('NNA')[0])#NNAs are appended as last atom - don't write them
-        f.write('\n\n')
+        if 'NNA' not in dfAsString:
+            f.write('\n\n')
+        else:
+            f.write('\n')
         if wfx:
             f.write(new_file_name+'.wfx\n\n\n')
         else:
