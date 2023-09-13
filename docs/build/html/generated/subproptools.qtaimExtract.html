@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>subproptools.qtaimExtract &#8212; subproptools 0.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="subproptools.subreor" href="subproptools.subreor.html" />
+    <link rel="prev" title="API" href="../api.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-subproptools.qtaimExtract">
+<span id="subproptools-qtaimextract"></span><h1>subproptools.qtaimExtract<a class="headerlink" href="#module-subproptools.qtaimExtract" title="Link to this heading">¶</a></h1>
+<p>qtaimExtract
+Tools for extracting data from sum files(and CC from agpviz), and calculating substituent properties specifically</p>
+<p>Authors
+Kevin Lefrancois-Gagnon
+Robert C. Mawhinney</p>
+<p>User facing functions
+* get_sub_di - gets delocalization index between a substituent and the rest of the molecule
+* get bcp_properties - returns a dictionary of bcp properties for a given bcp
+* get_atomic_props - returns dictionary of atomic properties for all atoms in molecule
+* get_cc_props - returns dictionary of properties for all charge concentrations
+* identify_vscc - returns only the VSCC from a set of charge concentrations
+* get_sub_props - returns dictionary of one substituent’s properties
+* extract_sub_props - returns dictionary of atomic, group, bcp and vscc properties for a substituent
+* sub_prop_frame - returns dictioanry of frames of group properties
+* get_xyz - extracts a molecule’s xyz geometry from sum file</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_sub_props</span></code>(data, subAtoms, sumFileNoExt)</p></td>
+<td><p>returns a dictionary of all group properties - bcp, group, atomic, and vscc Args:     data: list[str] - lines of a .sum file     subAtoms - indices of atoms in the molecule comprising group - starts at 1     groupProps - boolean - do you want to compute group properties     bcpId - list of 2 length lists. Pass empty list if no bcp properties wanted. 2 length lists are indices of atoms that you want BCPs for     lapRhoCpAtoms = list of atom indices that you want to find laprhoCPs for. Defaults to empty vol surface is 0.001 au isodensity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_all_connections</span></code>(data)</p></td>
+<td><p>find all pairs of atoms connected by a BCP</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_atom_vscc</span></code>(filename, atomLabel, type, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_atomic_props</span></code>(data)</p></td>
+<td><p>Returns a dictionary of atomic properties</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bcp_properties</span></code>(data[, atPair])</p></td>
+<td><p>Given lines of sum file and atom pair, return bcp properties for pair</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cc_props</span></code>(filename, atomLabel[, type, ...])</p></td>
+<td><p>takes a sumfilename with no extension and an atom label that we want cc for (eg F4) returns dictionary of all cc for atomLabelwith all the (3,+3) cc and properties</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_selected_bcps</span></code>(data, bcp_list)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_sub_di</span></code>(data[, subAtomLabels])</p></td>
+<td><p>Given lines of sum file and labels of atoms in substituent, return DI between substituent and rest of molecule</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_sub_props</span></code>(atomDict, subAtoms, atomList)</p></td>
+<td><p>Given atomic property dictionary and atoms to use, return dictionary of group properties.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_xyz</span></code>(data)</p></td>
+<td><p>Given sumfile, return dicitonary containing xyzcoordinates and atom labels</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">identify_vscc</span></code>(multiccDict, atomDict, originAtom)</p></td>
+<td><p>Given dictionary of charge concentraion properties and atomic properties, identify vscc</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sub_prop_frame</span></code>(csvFile)</p></td>
+<td><p>Given csv file, extract group properties for all files included and store properties Args:     csvFile: string containing csv file (WITH extension)     example csvFile structure:     Substituent, subAtoms,    label1,   label2,... CH3          1 3 4 5      SubH_CH3  SubC6H5_CH3          Substituent: string of substituent         subAtoms: string of space separated substituent atoms eg '1 3 4'         label1 - contains .sum file with no extension         labeli could be e.g. a model chemistry, or substrate         that is the column &quot;SubH&quot; would have sum files for the substituents attached to H         SubC6H5 would have sum files for substituents attached to C6H5 etc.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">subproptools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">subproptools.qtaimExtract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="subproptools.subreor.html">subproptools.subreor</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html">API</a><ul>
+      <li>Previous: <a href="../api.html" title="previous chapter">API</a></li>
+      <li>Next: <a href="subproptools.subreor.html" title="next chapter">subproptools.subreor</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Kevin Lefrancois-Gagnon, Robert Mawhinney.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/generated/subproptools.qtaimExtract.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

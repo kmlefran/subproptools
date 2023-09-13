@@ -198,25 +198,33 @@ def get_bcp_properties(data,atPair=['C1','H2']):
     return bcpDict
 
 def get_atomic_props(data):
-    """Given lines of sum file, return atomic property dictionary.
-    
-    Args:
-        data: list[str] - lines of a .sum file
-    
-    Returns:
-        Dictionary containing a dictionary for each atom
-        {'C1':{atomic properties for C1},
-        'H2':{atomic properties for H2},
-        ...
-        }
-    Keys included are: q,K, K_Scaled, Mu_Intra_X, Mu_Intra_Y, 
-        Mu_Intra_Z, Mu_Bond_X, Mu_Bond_Y,Mu_Bond_Z, Mu_X, Mu_Y, Mu_Z, Q_XX, Q_XY, Q_XZ, Q_YY,Q_YZ, Q_ZZ
-        |Mu_Intra|,|Mu_Bond|,|Mu|, quadContrib
+    """Returns a dictionary of atomic properties
 
-    Note: Q_XX, Q_XY etc are atomic quadrupoles
-    Atomic contributions to molecular quadrupole moment are accessed as:
-        >>> dict['C1']['quadContrib']['Q_xx']
+    :param data: The string lines of a .sum file
+    :type data: list[str]
+    :return: Dicionary with a key for each atom in the molecule
+    :rtype: dict
+
     """
+    # """Given lines of sum file, return atomic property dictionary.
+    
+    # Args:
+    #     data: list[str] - lines of a .sum file
+    
+    # Returns:
+    #     Dictionary containing a dictionary for each atom
+    #     {'C1':{atomic properties for C1},
+    #     'H2':{atomic properties for H2},
+    #     ...
+    #     }
+    # Keys included are: q,K, K_Scaled, Mu_Intra_X, Mu_Intra_Y, 
+    #     Mu_Intra_Z, Mu_Bond_X, Mu_Bond_Y,Mu_Bond_Z, Mu_X, Mu_Y, Mu_Z, Q_XX, Q_XY, Q_XZ, Q_YY,Q_YZ, Q_ZZ
+    #     |Mu_Intra|,|Mu_Bond|,|Mu|, quadContrib
+
+    # Note: Q_XX, Q_XY etc are atomic quadrupoles
+    # Atomic contributions to molecular quadrupole moment are accessed as:
+    #     >>> dict['C1']['quadContrib']['Q_xx']
+    # """
     
     #find tables where desired data is located    
     xyzFrame = _get_table(data,'Charge                X                  Y                  Z',endString='Some Atomic Properties:')
