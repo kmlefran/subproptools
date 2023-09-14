@@ -3,16 +3,16 @@
 
 .. automodule:: subproptools.qtaimExtract
 
-   
-   
-   
 
-   
-   
+
+
+
+
+
    .. rubric:: Functions
 
    .. autosummary::
-   
+
       extract_sub_props
       find_all_connections
       get_atom_vscc
@@ -25,16 +25,3 @@
       get_xyz
       identify_vscc
       sub_prop_frame
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

@@ -1,0 +1,118 @@
+
+def _find_closest_nuclei(xyz, atomDict):
+    """Returns two closest nuclei to point xyz given xyz and get_atomic_properties object"""
+    # probably need to update in symmetry case in case of equidistant nuclei
+    # original design purpose was to find nuclei closest to a charge concentration
+    distList = []  # initialize empty list for distances
+    atList = []  # initialize empty list for atom labels
+    for (
+        atom
+    ) in (
+        atomDict
+    ):  # get list of distances from point xyz to all atoms, and list of atom labels
+        atList.append(atom)
+        distList.append(_get_dist(xyz, atomDict[atom]["xyz"]))
+    npDistList = np.array(
+        distList
+    )  # convert distance list to array for np.where functionality
+    minDist = np.partition(npDistList, 1)[0:2]  # find the two lowest distances
+    # return atList with indices of npDistList that are equal to the two lowest values
+    return [
+        atList[np.where(npDistList == minDist[0])[0][0]],
+        atList[np.where(npDistList == minDist[1])[0][0]],
+    ]
+
+    def _trial_atomic_contrib_rotation(atomDict, rotMat):
+    # trial atomic contrib with rotation. Rotate second moment matrix after construction from original coordinates.
+    # did not seem to work
+    secondMomentMat = np.array(
+        [
+            [
+                (atomDict["Q_XX"][0] + atomDict["R+2"][0]) / 3,
+                atomDict["Q_XY"][0] / 3,
+                atomDict["Q_XZ"][0] / 3,
+            ],
+            [
+                atomDict["Q_XY"][0] / 3,
+                (atomDict["Q_YY"][0] + atomDict["R+2"][0]) / 3,
+                atomDict["Q_YZ"][0] / 3,
+            ],
+            [
+                atomDict["Q_XZ"][0] / 3,
+                atomDict["Q_YZ"][0] / 3,
+                (atomDict["Q_ZZ"][0] + atomDict["R+2"][0]) / 3,
+            ],
+        ]
+    )
+    secondRotMat = np.matmul(rotMat, secondMomentMat)
+    secondMomentDict = {}
+    secondMomentDict.update(
+        {
+            "Qxx": atomDict["q"][0] * (atomDict["xyz"][0] ** 2)
+            + secondRotMat[0, 0]
+            + atomDict["xyz"][0] * atomDict["Mu_Intra_X"][0]
+            + atomDict["xyz"][0] * atomDict["Mu_Intra_X"][0]
+        }
+    )
+    secondMomentDict.update(
+        {
+            "Qxy": atomDict["q"][0] * atomDict["xyz"][0] * atomDict["xyz"][1]
+            + secondRotMat[0, 1]
+            + atomDict["xyz"][1] * atomDict["Mu_Intra_X"][0]
+            + atomDict["xyz"][0] * atomDict["Mu_Intra_Y"][0]
+        }
+    )
+    secondMomentDict.update(
+        {
+            "Qxz": atomDict["q"][0] * atomDict["xyz"][0] * atomDict["xyz"][2]
+            + secondRotMat[0, 2]
+            + atomDict["xyz"][2] * atomDict["Mu_Intra_X"][0]
+            + atomDict["xyz"][0] * atomDict["Mu_Intra_Z"][0]
+        }
+    )
+    secondMomentDict.update(
+        {
+            "Qyy": atomDict["q"][0] * (atomDict["xyz"][1] ** 2)
+            + secondRotMat[1, 1]
+            + atomDict["xyz"][1] * atomDict["Mu_Intra_Y"][0]
+            + atomDict["xyz"][1] * atomDict["Mu_Intra_Y"][0]
+        }
+    )
+    secondMomentDict.update(
+        {
+            "Qyz": atomDict["q"][0] * atomDict["xyz"][1] * atomDict["xyz"][2]
+            + secondRotMat[1, 2]
+            + atomDict["xyz"][2] * atomDict["Mu_Intra_Y"][0]
+            + atomDict["xyz"][1] * atomDict["Mu_Intra_Z"][0]
+        }
+    )
+    secondMomentDict.update(
+        {
+            "Qzz": atomDict["q"][0] * (atomDict["xyz"][2] ** 2)
+            + secondRotMat[2, 2]
+            + atomDict["xyz"][2] * atomDict["Mu_Intra_Z"][0]
+            + atomDict["xyz"][2] * atomDict["Mu_Intra_Z"][0]
+        }
+    )
+    secondMomentDict.update(
+        {
+            "trace": secondMomentDict["Qxx"]
+            + secondMomentDict["Qyy"]
+            + secondMomentDict["Qzz"]
+        }
+    )
+    atomicQuadrupoleDict = {}
+    # get the atomic contribution to quadrupole
+    atomicQuadrupoleDict.update(
+        {"Q_xx": [0.5 * (3 * secondMomentDict["Qxx"] - secondMomentDict["trace"])]}
+    )
+    atomicQuadrupoleDict.update({"Q_xy": [0.5 * (3 * secondMomentDict["Qxy"])]})
+    atomicQuadrupoleDict.update({"Q_xz": [0.5 * (3 * secondMomentDict["Qxz"])]})
+    atomicQuadrupoleDict.update(
+        {"Q_yy": [0.5 * (3 * secondMomentDict["Qyy"] - secondMomentDict["trace"])]}
+    )
+    atomicQuadrupoleDict.update({"Q_yz": [0.5 * (3 * secondMomentDict["Qyz"])]})
+    atomicQuadrupoleDict.update(
+        {"Q_zz": [0.5 * (3 * secondMomentDict["Qzz"] - secondMomentDict["trace"])]}
+    )
+    return atomicQuadrupoleDict  # return dictionary

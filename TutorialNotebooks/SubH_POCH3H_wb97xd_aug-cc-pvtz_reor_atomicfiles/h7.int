@@ -19,26 +19,26 @@
  Wfx File:  SubH_POCH3H_wb97xd_aug-cc-pvtz_reor.wfx
  Out File:  SubH_POCH3H_wb97xd_aug-cc-pvtz_reor_atomicfiles/h7.int
 
- Wfx Title:   Title Card Required                                                           
- Job Title:   Title Card Required                                                           
+ Wfx Title:   Title Card Required
+ Job Title:   Title Card Required
 
  The value of -V/T from the wfx file =  2.0038150106E+00
  The molecular energy from the wfx file = -4.5772805618E+02
  The Proaim surface algorithm will be used.
  The critical points in the atomic surface:
-  1 BCP (Bond)   4.2176824768E-01  -2.1869956118E+00   3.3658427989E+00 C5      
+  1 BCP (Bond)   4.2176824768E-01  -2.1869956118E+00   3.3658427989E+00 C5
  Optional parameters read from input.
- 
+
 Model:  Restricted SCF
- 
+
  Restricted, closed-shell, single-determinant wavefunction.
    Number of electrons (from MO Occs)                   =          34.0000000000
    Number of Alpha electrons (from MO Occs)             =          17.0000000000
    Number of Beta electrons (from MO Occs)              =          17.0000000000
    Number of electron pairs (N*(N-1)/2)                 =         561.0000000000
    Number of electron pairs (from Muller 2EDM)          =         561.0000000000
- 
- Integration is over atom H7      
+
+ Integration is over atom H7
  MPts_ESP = 132
  Number of processors used for job =    2
  Dynamic cutoffs will be used throughout.
@@ -134,7 +134,7 @@ Analyzing atomic Laplacian of Rho topology and writing data to .agpviz file
    Dipole Y =  1.2432538534E-01   2.8880695498E+00  -2.9006936964E+00  -1.2624146626E-02
    Dipole Z = -2.5964088522E-02  -3.3339457288E+00   3.4718993224E+00   1.3795359359E-01
    |Dipole| =  1.3244969214E-01
- 
+
  Atomic Traceless Quadrupole Moment Tensor Q:
         QXX = -1.7138636969E-01
         QXY =  1.5820499944E-01
@@ -142,15 +142,15 @@ Analyzing atomic Laplacian of Rho topology and writing data to .agpviz file
         QYY =  3.5746066353E-01
         QYZ = -7.3041475037E-02
         QZZ = -1.8607429384E-01
- 
+
  Eigenvalues of Atomic Traceless Quadrupole Moment Tensor:
   -2.1794871493E-01  -1.9229537440E-01   4.1024408933E-01
- 
+
  Eigenvectors of Atomic Traceless Quadrupole Moment Tensor:
    8.9835879210E-01   3.5197957629E-01   2.6279623005E-01
   -2.8899040232E-01   2.3031584796E-02   9.5705490619E-01
   -3.3081116671E-01   9.3572427775E-01  -1.2240934606E-01
- 
+
  Electrostatic Forces on Nuclei by Atomic Electron Distribution:
      FrcAAX =  4.7880562268E-02
      FrcAAY =  1.8330287119E-01
@@ -158,7 +158,7 @@ Analyzing atomic Laplacian of Rho topology and writing data to .agpviz file
      FrcBAX = -3.4304414816E-01
      FrcBAY = -1.6981589661E+00
      FrcBAZ =  8.6284586905E-01
- 
+
  Electrostatic Energy and Force between Total Atomic Charge Distribution and Nuclei:
    1     2.3651846299E-01 -1.3245273822E-02  3.1028202253E-02 -6.7090587528E-02
    2     1.0885659548E-02 -1.9396061636E-03  5.1625472123E-04 -1.6975165270E-03
@@ -169,7 +169,7 @@ Analyzing atomic Laplacian of Rho topology and writing data to .agpviz file
    7    -1.2370856317E+00  4.7880562268E-02  1.8330287119E-01 -2.7719931007E-02
    8     2.6089980912E-02  1.1124779687E-02  5.2730558412E-03  8.2818234698E-04
  Total  -4.5399611378E-01  1.2846874780E-01  5.4290154933E-01 -1.5089279864E-01
- 
+
  Electrostatic Energy and Force between Atomic Electron Distribution and Nuclei:
    1    -3.0749132837E+00  2.3072330031E-02 -4.3710212492E-01  4.9322412881E-01
    2    -1.7515758280E-01  1.6749511696E-02 -1.8162312963E-02  2.0659241295E-02
@@ -180,7 +180,7 @@ Analyzing atomic Laplacian of Rho topology and writing data to .agpviz file
    7    -1.2370856317E+00  4.7880562268E-02  1.8330287119E-01 -2.7719931007E-02
    8    -2.7249177940E-01 -5.7609523644E-02 -5.1502888585E-02  8.5127114767E-04
  Total  -8.9951961670E+00 -2.9516358589E-01 -1.5148560949E+00  8.3512593804E-01
- 
+
  Electrostatic Energy and Force between Atomic Nucleus and Nuclei:
    1     3.3114317467E+00 -3.6317603854E-02  4.6813032717E-01 -5.6031471633E-01
    2     1.8604324235E-01 -1.8689117860E-02  1.8678567685E-02 -2.2356757822E-02
@@ -191,7 +191,7 @@ Analyzing atomic Laplacian of Rho topology and writing data to .agpviz file
    7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
    8     2.9858176031E-01  6.8734303330E-02  5.6775944426E-02 -2.3088800694E-05
  Total   8.5412000533E+00  4.2363233370E-01  2.0577576442E+00 -9.8601873668E-01
- 
+
   <Rho*L>      =  8.5288523124E-02
   Vol1(0.001)  =  4.6221209381E+01
   Vol2(0.002)  =  3.4962098314E+01
@@ -208,9 +208,9 @@ Analyzing atomic Laplacian of Rho topology and writing data to .agpviz file
  Maximum distance reached from nucleus =  1.2998742304E+01
  Integration volume =  1.9097204291E+03
  Maximum electron density at an "infinite" integration point ~  1.1018937804E-10
- 
+
 Basin Integral of GradRho =  2.3719067158E-01  8.6943801319E-01 -1.4347559389E-01
- 
+
  Cartesian Moments of the Electronic Charge Density Distribution (Nuclear Origin):
  --------------------------------------------------------------------------------
  -<Rho>       =     -9.5278731700E-01
@@ -269,7 +269,7 @@ Basin Integral of GradRho =  2.3719067158E-01  8.6943801319E-01 -1.4347559389E-0
  -<Rho*yyzzz> =     -1.1466319414E-01
  -<Rho*yzzzz> =      9.8708336387E-01
  -<Rho*zzzzz> =     -1.5690378736E+00
- 
+
  Real Spherical Harmonic Moments Q[l,|m|,?] of the Electronic Charge Density Distribution (Nuclear Origin):
    Condon-Shortly phase, (-1)**|m|, included
    Normalization factor, SqRt((2*l+1)/(4*pi)), not included
@@ -310,7 +310,7 @@ Basin Integral of GradRho =  2.3719067158E-01  8.6943801319E-01 -1.4347559389E-0
  Q[5,4,s]       =    6.4256469921E-02
  Q[5,5,c]       =    7.8279987647E-01
  Q[5,5,s]       =    1.0018370649E-02
- 
+
 Molecular Orbital (MO) Data:
 ---------------------------
   MO# i = ith MO in AIMAll (internal and output) order
@@ -340,11 +340,11 @@ Molecular Orbital (MO) Data:
       15        15     2.0000000000    Alpha,Beta    0.0061753291     0.3087664570     0.6481330124
       16        16     2.0000000000    Alpha,Beta    0.0019481766     0.0974088325     0.2044713038
       17        17     2.0000000000    Alpha,Beta    0.0096796958     0.4839847894     1.0159345759
- 
+
  The Atomic Overlap Matrix:
- 
+
  Restricted, closed-shell, single-determinant wavefunction.
- 
+
   0.0000000037
  -0.0000000003  0.0000000035
   0.0000000099  0.0000000048  0.0000040835
@@ -405,7 +405,7 @@ Molecular Orbital (MO) Data:
  D2(A,A)                                       =  2.5216268918E-01
  D2(A,A')                                      =  1.5468828041E+01
  D2(A,Mol)                                     =  1.5720990730E+01
- 
+
  Electronic Spin Properties:
  --------------------------
  N_alpha                  =  4.7639365850E-01
@@ -440,10 +440,10 @@ Molecular Orbital (MO) Data:
  L_beta                   =  1.1749936692E-05
  L_total                  =  2.3499873384E-05
  L_spin                   =  0.0000000000E+00
- 
+
 Interatomic Surface Properties:
 ------------------------------
-Interatomic Surface   1:  H7 C5            
+Interatomic Surface   1:  H7 C5
      Area(0.001)                       =  3.1679602965E+01
      Area(0.002)                       =  2.5489273272E+01
      Area(0.0004)                      =  4.1017802632E+01
@@ -506,7 +506,7 @@ Area                              =  3.3151144966E+01
 0.0004 Atomic IsoDensity Surface Properties:
 -------------------------------------------
 Area                              =  4.7214363901E+01
- 
+
  Virial-Based Energy Components (see "2EDM Note"):
  ------------------------------------------------
  Ee(A) = E(A) - W(A) = -5.9854923047E-01
@@ -514,7 +514,7 @@ Area                              =  4.7214363901E+01
  Ven(A)              = -8.9951961670E+00
  Ven(A,A) = VenO(A)  = -1.2370856317E+00
  Ven(A,A')           = -7.7581105354E+00
- 
+
 IQA Energy Components (see "2EDM Note"):
 ---------------------------------------
 T(A)                              =  5.9854923047E-01

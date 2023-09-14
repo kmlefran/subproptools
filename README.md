@@ -30,4 +30,3 @@ pip install git+https://github.com/kmlefran/subproptools
 * extract_sub_props - returns dictionary of atomic, group, bcp and vscc properties for a substituent
 * sub_prop_frame - returns dictioanry of frames of group properties
 * get_xyz - extracts a molecule's xyz geometry from sum file
-

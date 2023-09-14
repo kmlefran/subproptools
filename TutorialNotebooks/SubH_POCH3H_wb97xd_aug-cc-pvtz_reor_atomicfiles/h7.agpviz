@@ -19,11 +19,11 @@
  Wfx File:  SubH_POCH3H_wb97xd_aug-cc-pvtz_reor.wfx
  Out File:  SubH_POCH3H_wb97xd_aug-cc-pvtz_reor_atomicfiles/h7.int
 
- Wfx Title:   Title Card Required                                                           
- Job Title:   Title Card Required                                                           
- 
+ Wfx Title:   Title Card Required
+ Job Title:   Title Card Required
+
 <Atom>
-H7      
+H7
 </Atom>
 <Nuclei of Molecule>
      8
@@ -55,7 +55,7 @@ H8         1.0           2.8071994964E+00  -7.6777380359E-01   3.4710319381E+00
      0
 </Number of Degenerate CPs of DelSqRho>
 <CP of DelSqRho>
-CP# = 1       
+CP# = 1
 Type = (3,+3)
 Coords =  2.26392755452419E-01 -2.89567203763126E+00  3.47114190964682E+00
 DistFromNuc =  5.2565312341E-03
@@ -68,7 +68,7 @@ HessDelSqRho_EigVec2 =  4.6584752091E-01 -1.7153062455E-03  8.8486334820E-01
 HessDelSqRho_EigVec3 =  8.4412517743E-01 -2.9907415693E-01 -4.4498014955E-01
 </CP of DelSqRho>
 <CP of DelSqRho>
-CP# = 2       
+CP# = 2
 Type = (3,-3)
 Coords =  1.31253096854909E-01 -3.60066326856971E+00  3.64436351842386E+00
 DistFromNuc =  7.2697768958E-01
@@ -81,7 +81,7 @@ HessDelSqRho_EigVec2 =  9.7676080273E-01 -1.0231259032E-01  1.8833605100E-01
 HessDelSqRho_EigVec3 = -1.5815925201E-01  2.4897316540E-01  9.5550929557E-01
 </CP of DelSqRho>
 <CP of DelSqRho>
-CP# = 3       
+CP# = 3
 Type = (3,-1)
 Coords =  7.41549692096882E-01 -3.42040088159578E+00  2.83863301516847E+00
 DistFromNuc =  9.6845651304E-01
@@ -94,7 +94,7 @@ HessDelSqRho_EigVec2 =  7.2938324794E-01 -8.1706713635E-02  6.7920842940E-01
 HessDelSqRho_EigVec3 =  6.8106162763E-01  1.8027823572E-01 -7.0968642166E-01
 </CP of DelSqRho>
 <CP of DelSqRho>
-CP# = 4       
+CP# = 4
 Type = (3,+1)
 Coords = -4.99718102109145E-01 -2.89678076953925E+00  4.12475783728362E+00
 DistFromNuc =  9.7545285452E-01
