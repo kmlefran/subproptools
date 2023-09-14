@@ -26,8 +26,8 @@ import numpy as np
 import pandas as pd  # data frames
 
 from subproptools import (
-    qtaim_extract as qt,
-)  # sum file manipulation and property extraction
+    qtaim_extract as qt,  # sum file manipulation and property extraction
+)
 from subproptools.reference_maps import _REFERENCE_MAP
 
 # import sys
@@ -266,7 +266,7 @@ def _zero_z_for_negx(t_xyz, negXAtom):
 
 
 def _set_xaxis(xyzArray, negXAtom):
-    """Given xyz geometry with atom at origin, return xyz geometry with negXAtom on -x."""
+    """Given xyz geometry with atom at origin, areturn xyz geometry with negXAtom on -x."""
     t_xyz = xyzArray.T
 
     # define initial xyz vector lengths. Should be unchanged after rotation
