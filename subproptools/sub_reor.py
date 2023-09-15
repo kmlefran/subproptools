@@ -537,6 +537,7 @@ def rotate_substituent_aiida(
         .
         .
     """
+    # pylint:disable=too-many-locals
     # read sum file
     data = sum_file_folder.get_object_content("aiida.sum").split("\n")
 
@@ -544,16 +545,22 @@ def rotate_substituent_aiida(
     # Labels format A1 etc
     negXAtomLabel = molecule_xyz["Atoms"][negXAtom - 1]
     attachedAtom = molecule_xyz["Atoms"][originAtom - 1]
-    # perform reorientation
-    molecule_xaxis = _set_xaxis(_set_origin(molecule_xyz["xyz"], originAtom), negXAtom)
-    if posYAtom:
-        posYPoint = molecule_xaxis[posYAtom - 1]
-    else:
+    if not posYAtom:
         posYPoint = _get_posy_point_aiida(
             data, cc_dict, atom_dict, attachedAtom, negXAtomLabel
         )
+    else:
+        posYPoint = []
+    if posYPoint:
+        xyz_w_y_pt = np.append(molecule_xyz["xyz"], [posYPoint], axis=0)
+    # perform reorientation
+    molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
+    if posYAtom:
+        final_y = molecule_xaxis[posYAtom - 1]
+    else:
+        final_y = molecule_xaxis[-1]
     if len(posYPoint) > 0:
-        final_orientation = _set_yaxis(molecule_xaxis, posYPoint)
+        final_orientation = _set_yaxis(molecule_xaxis[0:-1], final_y)
     else:
         final_orientation = molecule_xaxis
     # Generate output
@@ -602,6 +609,7 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
         .
         .
     """
+    # pylint:disable=too-many-locals
     # read sum file
     with open(sumFileNoExt + ".sum", encoding="utf-8") as sumFile:
         # sumFile = open(sumFileNoExt + ".sum")
@@ -614,16 +622,23 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
     negXAtomLabel = molecule_xyz["Atoms"][negXAtom - 1]
     attachedAtom = molecule_xyz["Atoms"][originAtom - 1]
     # perform reorientation
-    molecule_orig = _set_origin(molecule_xyz["xyz"], originAtom)
-    molecule_xaxis = _set_xaxis(molecule_orig, negXAtom)
-    if posYAtom:
-        posYPoint = molecule_xaxis[posYAtom - 1]
-    else:
+    if not posYAtom:
         posYPoint = _get_posy_point(sumFileNoExt, atomDict, attachedAtom, negXAtomLabel)
+    else:
+        posYPoint = []
+    if posYPoint:
+        xyz_w_y_pt = np.append(molecule_xyz["xyz"], [posYPoint], axis=0)
+    # perform reorientation
+    molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
+    if posYAtom:
+        final_y = molecule_xaxis[posYAtom - 1]
+    else:
+        final_y = molecule_xaxis[-1]
     if len(posYPoint) > 0:
-        final_orientation = _set_yaxis(molecule_xaxis, posYPoint)
+        final_orientation = _set_yaxis(molecule_xaxis[0:-1], final_y)
     else:
         final_orientation = molecule_xaxis
+
     # Generate output
     outFrame = pd.DataFrame(final_orientation * 0.529177, columns=["x", "y", "z"])
     outFrame["Atom"] = molecule_xyz["Atoms"]
