@@ -1065,11 +1065,11 @@ def sub_prop_frame(csvFile: str) -> dict:  # pylint:disable=too-many-locals
     return all_label_dict
 
 
-def get_xyz(data) -> dict:
-    """Given sumfile, return dicitonary containing xyzcoordinates and atom labels
+def get_xyz(data: list[str]) -> dict:
+    """Given lines of sumfile, return dicitonary containing xyzcoordinates and atom labels
 
     Args:
-        sumfile: string with sumfile to be used, without .sum extenstion
+        data: lines of sum file
 
     Returns:
         Dictionary
