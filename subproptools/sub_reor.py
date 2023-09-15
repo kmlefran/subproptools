@@ -157,7 +157,7 @@ def _find_clockwise_rot(
 
                 rot_geom = _set_xaxis(
                     _set_origin(to_rotate, 1),
-                    list(atomDict.keys()).index(negXAtomLabel) + 1,
+                    2,
                 )
                 # zero_3d = np.array([0.0, 0.0, 0.0])
                 bcp_1_xyz = rot_geom[2]
