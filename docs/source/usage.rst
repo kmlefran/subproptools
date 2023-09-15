@@ -13,6 +13,12 @@ To use subproptools, first install it using pip:
 Extracting Atomic Properties
 ----------------------------
 
-To retrieve a dictionary of the atomic properties, you can use the ``subproptools.qtaimExtract.get_atomic_properties()`` function
+To retrieve a dictionary of the atomic properties, you can use the ``subproptools.qtaim_extract.get_atomic_props()`` function
 
-.. autofunction:: subproptools.qtaimExtract.get_atomic_props
+.. autofunction:: subproptools.qtaim_extract.get_atomic_props
+
+Extracting BCP Properties
+-------------------------
+To retrieve a dictionary of BCP properties for a specific BCP:
+
+.. autofunction:: subproptools.qtaim_extract.get_bcp_properties

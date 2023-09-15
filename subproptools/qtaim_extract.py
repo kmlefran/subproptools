@@ -1,6 +1,7 @@
 """qtaimExtract
 Tools for extracting data from sum files(and CC from agpviz), and calculating substituent properties specifically
 """
+# pylint:disable=too-many-lines
 import ast
 import math  # sqrt
 import os  # file system stuff
@@ -9,18 +10,10 @@ import numpy as np  # arrays
 import pandas as pd  # data frames
 
 
-def _search_str(linesObj, word, searchStart=0, ignore=0):
-    """Given lines of file, return line that word is on.
-
-    Args:
-        lines obj - list, each containing a string. e.g. the output of file.readlines() method
-        word - string that we look to match
-        searchStart - integer, if we don't need to start searching at the beginning, choose \
-        line number to start at
-        ignore - integer on how many instances of the string to ignore
-    Returns:
-        index of line that word occurs, or -1 if not found
-    """
+def _search_str(
+    linesObj: list[str], word: str, searchStart: int = 0, ignore: int = 0
+) -> int:
+    """Given lines of file, return line that word is on. or -1 if not found"""
     wordLine = -1  # will return -1 if string not found
     for ln_num, line in enumerate(linesObj):  # iterate over lines
         if line.find(word) > -1 and linesObj.index(line) >= searchStart:
@@ -32,15 +25,9 @@ def _search_str(linesObj, word, searchStart=0, ignore=0):
 
 
 def _get_di_table(
-    data,
-):
-    """Given lines of sum file, returns the table containing DI information.
-    Args:
-        data: list[str] - the lines of a sum file
-    Returns:
-        pandas DataFrame with columns:
-        Atom A, Atom B, 2*D2(A,B), DI(A,B), %Deloc(A,B), %Deloc(B,A)
-    """
+    data: list[str],
+) -> pd.DataFrame:
+    """Given lines of sum file, returns the table containing DI information."""
     tableStart = (
         _search_str(
             data,
@@ -65,16 +52,20 @@ def _get_di_table(
     return table
 
 
-def _get_table(data, tableHeader, ignored=0, endString="Total"):
+def _get_table(
+    data: list[str], tableHeader: str, ignored: int = 0, endString: str = "Total"
+) -> pd.DataFrame:
     """Given lines of sum file and table header, return pandas dataframe of requested table
 
     Args:
-        data:list[str] - lines of sum file
-        tableHeader - string containing non-atom columns of table to be found
-        ignored - int - find ignored+1th occurence
-        endString - the string found 2 lines after the table data ends
+        data: lines of sum file
+        tableHeader: string containing non-atom columns of table to be found
+        ignored: - find ignored+1th occurence
+        endString: the string found 2 lines after the table data ends
+
     Returns:
-        pandas dataframe of requested table
+        dataframe of table matching header
+
     """
     tableStart = (
         _search_str(data, tableHeader, searchStart=0, ignore=ignored) + 2
@@ -112,8 +103,17 @@ def _get_bcp_block(data, atPair=["C1", "H2"]):  # pylint:disable=dangerous-defau
     return bcpBlock  # return the lines of the BCP data
 
 
-def get_sub_di(data, subAtomLabels):
-    """Given lines of sum file and labels of atoms in substituent, return DI between substituent and rest of molecule"""
+def get_sub_di(data: list[str], subAtomLabels=list[str]) -> float:
+    """Given lines of sum file and labels of atoms in substituent, return DI between substituent and rest of molecule
+
+    Args:
+        data: lines of .sum file
+        subAtomLabels: list of atoms in the substituent, e.g.["C1","C2"]
+
+    Returns:
+        DI between substituent atoms and rest of molecule
+
+    """
     diTable = _get_di_table(data)
     diTable = diTable.drop(["2*D2(A,B)", "%Deloc(A,B)", "%Deloc(B,A)"], axis=1)
     diClass = []
@@ -137,17 +137,27 @@ def get_sub_di(data, subAtomLabels):
 
 
 def get_bcp_properties(
-    data, atPair=["C1", "H2"]
+    data: list[str], atPair: list[str] = ["C1", "H2"]
 ):  # pylint:disable=dangerous-default-value
-    """Given lines of sum file and atom pair, return bcp properties for pair
+    """Get BCP Properties for BCP between two atoms in list
 
     Args:
-        data: list[str] - lines of a .sum file
+        data: lines of a .sum file
         atPair: list of atom labels for which to find BCP, e.g. ['C1','H2']
+
     Returns:
-        dictionary containing properties of atPair bcp
-        keys are:
-        Coords (np array of xyz coords), 'Rho', lambda1,lambda2,lambda3,DelSqRho,Ellipticity,V,G,H
+        dictionary containing properties of atPair bcp with keys
+            'xyz' (np array of xyz coords),
+            'rho',
+            lambda1,
+            lambda2,
+            lambda3,
+            DelSqRho,
+            Ellipticity,
+            V,
+            G,
+            H
+
     """
     bcpBlock = _get_bcp_block(data, atPair)
     bcpDict = {}
@@ -183,13 +193,22 @@ def get_bcp_properties(
     return bcpDict
 
 
-def get_atomic_props(data):
+def get_atomic_props(data: list[str]) -> dict:
     """Returns a dictionary of atomic properties
 
-    :param data: The string lines of a .sum file
-    :type data: list[str]
-    :return: Dicionary with a key for each atom in the molecule
-    :rtype: dict
+    Args:
+        data: the string lines of a .sum file
+
+    Returns:
+        A dictionary of atomic properties with one key for each atom label e.g. 'C1'
+        Each of those dictionaries has the following keys:
+        xyz, q, K, K_Scaled, Mu_Intra_X, Mu_Intra_Y, Mu_Intra_Z, Mu_Bond_X, Mu_Bond_Y, Mu_Bond_Z,
+        Mu_X, Mu_Y, Mu_Z, |Mu_Intra|, |Mu_Bond|, |Mu|, Q_XX, Q_XY, Q_XZ, Q_YY, Q_YZ, Q_ZZ, R+2, R+1, Vol, quadContrib
+
+    Note:
+        Volume is calculated at the 0.001 au isosurface
+        quadContrib is the atomic contribution to the molecular
+        quadrupole moment from Laidig TODO add citation
 
     """
     xyzFrame = _get_table(
@@ -368,19 +387,24 @@ def _is_bonded_cc(ccXYZ, atomDict, originAtom):
     return on_a_line
 
 
-def identify_vscc(multiccDict, atomDict, originAtom, thresh=0.7):
-    """Given dictionary of charge concentraion properties and atomic properties, identify vscc
+def identify_vscc(
+    multiccDict: dict, atomDict: dict, originAtom: str, thresh: float = 0.7
+) -> dict:
+    """Filter charge concentrations for an atom to only return Valence Shell Charge Concentrations
 
     Args:
-        multiccDict - dictionary of cc properties for all ccs of an atom
-        atomDict - get_atomic_properties object
-        threshold - distance between inner shell and outer shell ccs
+        multiccDict: dictionary of cc properties for all ccs of an atom
+        atomDict: get_atomic_props return object
+        thresh: distance between inner shell and outer shell ccs
+        originAtom: label of atom in molecule, e.g. 'C1'
         #(eg inner shell charge concentration is more than 0.7 au closer to nuclei than VSCC)
     Returns:
         subset of multiccDict correspondng to valence shell charge concentrations
 
     Note:
         VSCCs identified by: not being on nuclei, not being on line between atoms, and being the outermost CCs
+        The default threshold is 0.7 au from a preliminary data analysis. For Si/P/S/Cl, this was found to be
+        greater than the distance between inner and outer charge concentrations
     """
 
     vsccDict = {}  # initialize empty dictionary for cc
@@ -424,8 +448,23 @@ def identify_vscc(multiccDict, atomDict, originAtom, thresh=0.7):
     return vsccDict
 
 
-def get_atom_vscc(filename, atomLabel, atomicProps, is_lines_data=False):
-    """Returns a dicitonary of the properties of VSCC for the atom"""
+def get_atom_vscc(
+    filename, atomLabel: str, atomicProps: dict, is_lines_data: bool = False
+):
+    """Returns a dicitonary of the properties of VSCC for the atom
+
+    Args:
+        filename: name of sum file without .sum extension OR lines of atomLabel's agpviz file if is_lines_data is True
+        atomLabel: label of atom in molecule, e.g. 'C1'
+        atomicProps: return value of a get_atomic_props function
+        is_lines_data: is filename actually the lines of an agpviz file instead of filename
+
+    Returns:
+        dictionary of dictionaries of all VSCC concentrations for atomLabel.
+            Keys are integer 1,2...n where n is number of cc
+            Each of those dict[key] is a dictionary as well containing cc properties
+
+    """
     all_cc_dict = get_cc_props(filename, atomLabel, is_lines_data)
     vscc_dict = identify_vscc(all_cc_dict, atomicProps, atomLabel)
     return vscc_dict
@@ -469,13 +508,13 @@ def _is_on_line(lineStartList, lineEndList, pointToCheckList, epsilon=0.1):
     return False
 
 
-def get_cc_props(filename, atomLabel, is_lines_data=False):
-    """takes a sumfilename with no extension and an atom label that we want cc for (eg F4)
-    returns dictionary of all cc for atomLabelwith all the (3,+3) cc and properties
+def get_cc_props(filename, atomLabel: str, is_lines_data: bool = False) -> dict:
+    """Gets all charge concentration properties for an atom
 
     Args:
-        filename: sum file name with no extension
+        filename: sum file name:str with no extension or lines of the desired agpviz file as list[str]
         atomLabel: label of atom that we wish to find VSCC for, e.g. 'N3'
+        is_lines_data: True if filename is lines of agpviz file, false otherwise
 
     Returns:
         Dictionary with one nested dictinoary for each VSCC found
@@ -483,6 +522,7 @@ def get_cc_props(filename, atomLabel, is_lines_data=False):
         2::{VSCC2 props}
         ,...}
         Sub-dictionary keys include: xyz, rho, delsqrho, distFromNuc
+
     """
     if not is_lines_data:
         # example dir name SubH_CCF-ReorPosY-B3LYP-def2-TZVPPD-Field_atomicfiles
@@ -524,7 +564,7 @@ def get_cc_props(filename, atomLabel, is_lines_data=False):
 
 
 def _get_atomic_quad_contrib(atomDict):
-    """Given atomDict from get_atomic_properties, create dictionary containing atomic quadupole contributions
+    """Given atomDict from get_atomic_props, create dictionary containing atomic quadupole contributions
 
     Note: formula used from paper by Laidig in 1991
     https://www.sciencedirect.com/science/article/abs/pii/000926149180247U
@@ -601,11 +641,11 @@ def _get_atomic_quad_contrib(atomDict):
     return atomicQuadrupoleDict  # return dictionary
 
 
-def get_sub_props(atomDict, subAtoms, atomList):
-    """Given atomic property dictionary and atoms to use, return dictionary of group properties.
+def get_sub_props(atomDict: dict, subAtoms: list[int], atomList: list[str]):
+    """Combine atomic properties together into group properties
 
     Args:
-        atomDict: output from get_atomic_properties
+        atomDict: output from get_atomic_props
         subAtoms: list[int] integer labels of atoms in substituent [1, 2,...]
         atomList: list[str] string list of atom labels, ['C1', 'H2'...]
 
@@ -691,6 +731,9 @@ def get_sub_props(atomDict, subAtoms, atomList):
 
 
 def _check_num_atoms(atom_label_list: list[str], atom_int_list: list[str]) -> None:
+    """Runs a check to make sure number of atoms equals the expected.
+
+    Returns ValueError if not"""
     num_atoms = len(atom_label_list)
     max_int = max(atom_int_list)
     if max_int > num_atoms:
@@ -703,23 +746,27 @@ def extract_sub_props(
     data: list[str],
     subAtoms: list[int],
     sumFileNoExt: str,
-    groupProps=True,
+    groupProps: bool = True,
     bcpId=[[1, 2]],
     lapRhoCpAtoms=[],
 ):  # pylint:disable=dangerous-default-value
     # pylint:disable=too-many-arguments
     """returns a dictionary of all group properties - bcp, group, atomic, and vscc
+
     Args:
         data: list[str] - lines of a .sum file
-        subAtoms - indices of atoms in the molecule comprising group - starts at 1
-        groupProps - boolean - do you want to compute group properties
-        bcpId - list of 2 length lists. Pass empty list if no bcp properties wanted.
+        subAtoms: indices of atoms in the molecule comprising group - starts at 1
+        groupProps: do you want to compute group properties
+        bcpId: list of 2 length lists. Pass empty list if no bcp properties wanted.
         2 length lists are indices of atoms that you want BCPs for
         lapRhoCpAtoms = list of atom indices that you want to find laprhoCPs for. Defaults to empty
-    vol surface is 0.001 au isodensity
 
     Returns:
         nested dictionaries with keys 'Group', 'Atomic', 'BCP', 'VSCC'
+
+    Notes:
+        vol surface is 0.001 au isodensity
+
     """
     atomList = list(
         _get_table(
@@ -733,8 +780,6 @@ def extract_sub_props(
         for i in range(0, len(atomList))
         if any(x == i + 1 for x in subAtoms)
     ]
-
-    # if bcpIdx not empty, get bcp properties for each listed bcp
 
     atomicProps = get_atomic_props(data)  # get atomic dictionary
     bcpProperties = extract_requested_bcp_props(
@@ -763,8 +808,22 @@ def extract_sub_props(
     return outDict
 
 
-def extract_requested_cc_props(lapRhoCpAtoms, sumFileNoExt, atomList, atomicProps):
-    """Get VSCC dict for requested atoms"""
+def extract_requested_cc_props(
+    lapRhoCpAtoms: list[int], sumFileNoExt: str, atomList: list[str], atomicProps: dict
+) -> dict:
+    """Get VSCC dict for requested atoms
+
+    Args:
+        lapRhoCpAtoms: indices of atoms(starting at 1) that you want to find VSCC for
+        sumFileNoExt: filename of sum file without extension
+        atomList: list of atom labels in molecule. e.g. ['C1','H2']
+        atomicProps: dictionary output of get_atomic_props
+
+    Returns:
+        Nested dictionary with first layer keys:atomLabel, second layer integer label of VSCC,
+        third layer properties extracted
+
+    """
     vsccProps = {}
     for atom in lapRhoCpAtoms:  # for each atom requested, get lapRhoCps
         allCC = get_cc_props(sumFileNoExt, atomList[atom - 1])
@@ -774,8 +833,26 @@ def extract_requested_cc_props(lapRhoCpAtoms, sumFileNoExt, atomList, atomicProp
     return vsccProps
 
 
-def extract_requested_bcp_props(data, atomList, bcpId, subatomLabels, atomicProps):
-    """Get BCP dict for requested bcps"""
+def extract_requested_bcp_props(
+    data: list[str],
+    atomList: list[str],
+    bcpId: list[list[str]],
+    subatomLabels: list[str],
+    atomicProps: dict,
+) -> dict:
+    """Get BCP dict for requested bcps
+
+    Args:
+        data: lines of .sum file
+        atomList: list of atom labels in molecule. e.g. ['C1','H2']
+        bcpId: list of 2 length lists.
+        subAtomLabels: list of atoms in the substituent, e.g.["C1","C2"]
+        atomicProps: dictionary output of get_atomic_props
+
+    Returns:
+        Nested dictionary. First level is the ID of bcp requested of form 'A1-A2', second is extracted properties
+
+    """
     bcpIdx = []
     for bcp in bcpId:
         atList = []
@@ -811,8 +888,18 @@ def extract_requested_bcp_props(data, atomList, bcpId, subatomLabels, atomicProp
     return bcpProperties
 
 
-def get_selected_bcps(data, bcp_list):
-    """Given a list of bcps, return dictionary of bcp properties."""
+def get_selected_bcps(data: list[str], bcp_list: list[list[str]]):
+    """Given a list of bcps, return dictionary of bcp properties.
+
+    Args:
+        data: lines of sum file
+        bcp_list: list of 2 length lists.
+
+    Returns:
+        Nested dictionary. First level is the ID of bcp requested of form 'A1-A2', second is extracted properties
+
+    Notes: as compared to extract_requested_bcp_props, returns fewer properties - r(a1-a2), no DI(R,G)
+    """
     bcpProperties = {}  # initialize empty dictionary
     for bcpPair in bcp_list:
         prop = get_bcp_properties(data, bcpPair)
@@ -822,6 +909,7 @@ def get_selected_bcps(data, bcp_list):
 
 def find_connected(data, negXAtomLabel, originAtomLabel):
     """Given lines of sumfile, atom on -x label, and atom on origin Label, find atoms bonded to origin.
+
     Args:
         data: list[str]: lines of sumfile
         negXAtomLabel: str: eg. 'H2'
@@ -830,6 +918,7 @@ def find_connected(data, negXAtomLabel, originAtomLabel):
         List of List of BCPs connected to origin atom
         e.g.
             [['C1',H3'],['C1','H4'],['C1','H5']]
+
     """
     # find all atoms to which bonded
     bcpLines = []
@@ -849,7 +938,17 @@ def find_connected(data, negXAtomLabel, originAtomLabel):
 
 
 def find_all_connections(data):
-    """find all pairs of atoms connected by a BCP"""
+    """Given lines of sumfile, finds all BCPs in file.
+
+    Args:
+        data: list[str]: lines of sumfile
+
+    Returns:
+        List of List of BCPs
+        e.g.
+            [['C1',H3'],['C1','H4'],['C1','H5']]
+
+    """
     bcpLines = []
     for line in data:
         split_line = line.split()
@@ -864,10 +963,11 @@ def find_all_connections(data):
 
 def sub_prop_frame(csvFile: str) -> dict:  # pylint:disable=too-many-locals
     """Given csv file, extract group properties for all files included and store properties
+
     Args:
         csvFile: string containing csv file (WITH extension)
         example csvFile structure:
-        Substituent, subAtoms,    label1,   label2,...
+        Substituent, subAtoms,    label1,     label2,...
         CH3          1 3 4 5      SubH_CH3  SubC6H5_CH3
             Substituent: string of substituent
             subAtoms: string of space separated substituent atoms eg '1 3 4'
@@ -888,6 +988,7 @@ def sub_prop_frame(csvFile: str) -> dict:  # pylint:disable=too-many-locals
                 Mu_Bond_X, Mu_Bond_Y,Mu_Bond_Z, Mu_X, Mu_Y, Mu_Z, Q_xx, Q_xy, Q_xz, Q_yy,Q_yz,Q_zz,Vol,
                 |Mu_Intra|,|Mu_Bond|,|Mu|
             BCP frame has columns: Substituent, rho, delsqrho, lambda1, lambda2, lambda3,V,G,H,DI
+
     """
     csvFrame = pd.read_csv(csvFile)
 

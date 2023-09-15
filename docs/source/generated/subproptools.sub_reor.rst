@@ -1,7 +1,7 @@
-﻿subproptools.subreor
-====================
+﻿subproptools.sub\_reor
+======================
 
-.. automodule:: subproptools.subreor
+.. automodule:: subproptools.sub_reor
 
 
 

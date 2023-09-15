@@ -5,7 +5,7 @@
 
 Welcome to subproptools's documentation!
 ========================================
-.. automodule::subproptools.qtaimExtract
+.. automodule::subproptools.qtaim_extract
    :members:
 
 Contents

@@ -1,7 +1,7 @@
-﻿subproptools.qtaimExtract
-=========================
+﻿subproptools.qtaim\_extract
+===========================
 
-.. automodule:: subproptools.qtaimExtract
+.. automodule:: subproptools.qtaim_extract
 
 
 
@@ -13,8 +13,11 @@
 
    .. autosummary::
 
+      extract_requested_bcp_props
+      extract_requested_cc_props
       extract_sub_props
       find_all_connections
+      find_connected
       get_atom_vscc
       get_atomic_props
       get_bcp_properties
