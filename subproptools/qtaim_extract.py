@@ -203,7 +203,8 @@ def get_atomic_props(data: list[str]) -> dict:
         A dictionary of atomic properties with one key for each atom label e.g. 'C1'
         Each of those dictionaries has the following keys:
         xyz, q, K, K_Scaled, Mu_Intra_X, Mu_Intra_Y, Mu_Intra_Z, Mu_Bond_X, Mu_Bond_Y, Mu_Bond_Z,
-        Mu_X, Mu_Y, Mu_Z, |Mu_Intra|, |Mu_Bond|, |Mu|, Q_XX, Q_XY, Q_XZ, Q_YY, Q_YZ, Q_ZZ, R+2, R+1, Vol, quadContrib
+        Mu_X, Mu_Y, Mu_Z, ``|Mu_Intra|``, ``|Mu_Bond|``, ``|Mu|``, Q_XX, Q_XY, Q_XZ, Q_YY, Q_YZ,
+        Q_ZZ, R+2, R+1, Vol, quadContrib
 
     Note:
         Volume is calculated at the 0.001 au isosurface
@@ -652,7 +653,7 @@ def get_sub_props(atomDict: dict, subAtoms: list[int], atomList: list[str]):
     Returns:
         dictionary of group properties with the following keys: q,K, K_Scaled, Mu_Intra_X, Mu_Intra_Y,
         Mu_Intra_Z, Mu_Bond_X, Mu_Bond_Y,Mu_Bond_Z, Mu_X, Mu_Y, Mu_Z, Q_xx, Q_xy, Q_xz,
-        Q_yy,Q_yz,Q_zz,Vol, |Mu_Intra|,|Mu_Bond|,|Mu|
+        Q_yy,Q_yz,Q_zz,Vol, ``|Mu_Intra|``,``|Mu_Bond|``,``|Mu|``
 
     Note:
         in output dictionary, each property is stored as a one element list(to enable pandas later)
@@ -945,8 +946,7 @@ def find_all_connections(data):
 
     Returns:
         List of List of BCPs
-        e.g.
-            [['C1',H3'],['C1','H4'],['C1','H5']]
+        e.g. [['C1',H3'],['C1','H4'],['C1','H5']]
 
     """
     bcpLines = []
@@ -978,16 +978,13 @@ def sub_prop_frame(csvFile: str) -> dict:  # pylint:disable=too-many-locals
 
     Returns:
         dictionary of dicitonary of data frames containing group properties
-        {'label1': {
-            'Group': Pandas Data Frame
-            'BCP': Pandas Data Frame containing BCP properties for bcp between atoms 1 and 2
-        },
-        'label2': same as label1 but for second label
-        }
-    Notes: Group frame has columns: Substituent, q,K, K_Scaled, Mu_Intra_X, Mu_Intra_Y, Mu_Intra_Z,
-                Mu_Bond_X, Mu_Bond_Y,Mu_Bond_Z, Mu_X, Mu_Y, Mu_Z, Q_xx, Q_xy, Q_xz, Q_yy,Q_yz,Q_zz,Vol,
-                |Mu_Intra|,|Mu_Bond|,|Mu|
-            BCP frame has columns: Substituent, rho, delsqrho, lambda1, lambda2, lambda3,V,G,H,DI
+        {'label1': {'Group': Pandas Data Frame, 'BCP': Pandas Data Frame}}
+
+    Notes:
+        Group frame has columns: Substituent, q,K, K_Scaled, Mu_Intra_X, Mu_Intra_Y, Mu_Intra_Z,
+        Mu_Bond_X, Mu_Bond_Y,Mu_Bond_Z, Mu_X, Mu_Y, Mu_Z, Q_xx, Q_xy, Q_xz, Q_yy,Q_yz,Q_zz,Vol,
+        ``|Mu_Intra|``,``|Mu_Bond|``,``|Mu|``
+        BCP frame has columns: Substituent, rho, delsqrho, lambda1, lambda2, lambda3,V,G,H,DI
 
     """
     csvFrame = pd.read_csv(csvFile)
