@@ -444,7 +444,7 @@ def _get_posy_point(
         posYPoint = (vscc[vkeys[0]]["xyz"] + vscc[vkeys[1]]["xyz"]) / 2
         # reorient to average of vscc points for +y
     else:
-        with open(sumFileNoExt + ".sum", encoding="wtf-8") as sumFile:
+        with open(sumFileNoExt + ".sum", encoding="utf-8") as sumFile:
             # sumFile = open()
             data = sumFile.readlines()
         # sumFile.close()
