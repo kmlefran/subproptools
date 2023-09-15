@@ -551,7 +551,7 @@ def rotate_substituent_aiida(
         )
     else:
         posYPoint = []
-    if posYPoint:
+    if len(posYPoint) > 0:
         xyz_w_y_pt = np.append(molecule_xyz["xyz"], [posYPoint], axis=0)
     # perform reorientation
     molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
@@ -626,7 +626,7 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
         posYPoint = _get_posy_point(sumFileNoExt, atomDict, attachedAtom, negXAtomLabel)
     else:
         posYPoint = []
-    if posYPoint:
+    if len(posYPoint) > 0:
         xyz_w_y_pt = np.append(molecule_xyz["xyz"], [posYPoint], axis=0)
     # perform reorientation
     molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
