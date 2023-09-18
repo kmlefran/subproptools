@@ -21,7 +21,6 @@ from subproptools import (
 from subproptools.reference_maps import _REFERENCE_MAP
 
 _DEFAULT_STAT_DICT = {
-    """calculated means and standard deviations of BCP properties from Transferability paper data"""
     "rho": {"mean": 0.290686, "sd": 0.077290},
     "lambda1": {"mean": -0.725552, "sd": 0.299756},
     "lambda2": {"mean": -0.678830, "sd": 0.291123},
