@@ -7,16 +7,6 @@ Module to reorient a substituent to match a defined coordinate system
 * if there are two lone pairs, the average position of them lies on the +y
 * if there are no lone pairs, map the BCPs of the atom at the origin to a reference. Identify the
 closest match to the reference to determine a BCP to set as +y
-
-# Authors
-Kevin Lefrancois-Gagnon
-Robert C. Mawhinney
-
-# User Facing Functions:
-## subreor
-* rotate_sheet - performs rotations to the desired coordinate system for many molecules as defined in a csv file
-* output_to_gjf - writes the reoreinted geometry to a .gjf file
-* rotate_substituent - performs the defined rotation for an individual substituent
 """
 # sys.path.append(sys.path[0].replace("subproptools", "") + "/" + "referenceMaps")
 import math  # sqrt
@@ -30,12 +20,8 @@ from subproptools import (
 )
 from subproptools.reference_maps import _REFERENCE_MAP
 
-# import sys
-
-
-# define stat dicitnoary for scaling bcp properties
-# determined by taking all BCPs in the substrate paper of KLG and calculating mean and sd of each property
 _DEFAULT_STAT_DICT = {
+    """calculated means and standard deviations of BCP properties from Transferability paper data"""
     "rho": {"mean": 0.290686, "sd": 0.077290},
     "lambda1": {"mean": -0.725552, "sd": 0.299756},
     "lambda2": {"mean": -0.678830, "sd": 0.291123},
@@ -76,7 +62,7 @@ def _get_bcp_reference(originAtom, numBonds):
     elif originAtom == "Si" and numBonds == 4:  # sp3 carbon
         # print('sp3 silicon')
         retDict = _REFERENCE_MAP["Si"]["sp3"]
-    elif originAtom == "Si" and numBonds == 3:  # sp2 carbon
+    elif originAtom == "Si" and numBonds == 3:  # sp2 si
         # print('sp2 silicon')
         retDict = _REFERENCE_MAP["Si"]["sp2"]
     elif originAtom == "P" and numBonds == 4:
@@ -209,9 +195,16 @@ def _order_bcp_dict(crossDict, bcpPropDict):
 
 
 def _set_origin(xyzArray, originAtom):
-    """shifts all points in xyz geometry by originAtom coordinates, returns xyz geometry"""
+    """shifts all points in xyz geometry by originAtom coordinates, returns xyz geometry
+
+    Args:
+        xyzArray: [3XN] np.array where N is number of atoms
+        origin Atom: integer label of atom in molecule to be used as origin, starting at 1
+
+    Returns:
+        Geometry shifted by setting xyzArray[originAtom-1] as the origin"""
     org = xyzArray[
-        originAtom - 1,
+        originAtom - 1,  # -1 to convert atom index to python starting at 0
     ]
     return xyzArray - org
 
@@ -228,7 +221,15 @@ def _get_lengths(xyzArray):
 
 
 def _zero_y_for_negx(t_xyz, negXAtom):
-    """perform first rotation in setting -x axis to zero the y value"""
+    """perform first rotation in setting -x axis to zero the y value
+
+    Args:
+        t_xyz: [Nx3] np.array for N atoms
+        negXAtom: integer label of atom to be positioned on -x axis
+
+    Returns:
+        [Nx3] rotated geometry with negXAtom on the xz plane
+    """
     if t_xyz[0, negXAtom - 1] == 0 and t_xyz[1, negXAtom - 1] == 0:  # on xy
         # print('hi')
         G = np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]])
@@ -253,7 +254,14 @@ def _zero_y_for_negx(t_xyz, negXAtom):
 
 
 def _zero_z_for_negx(t_xyz, negXAtom):
-    """perform second rotation in setting -x axis to zero the z value"""
+    """perform second rotation in setting -x axis to zero the z value
+
+    Args:
+        t_xyz: [Nx3] np.array for N atoms
+        negXAtom: integer label of atom to be positioned on -x axis
+
+    Returns:
+        [Nx3] rotated geometry with negXAtom on the x acis(may be + or -)"""
     # perform after y
     d = t_xyz[0, negXAtom - 1] / math.sqrt(
         t_xyz[0, negXAtom - 1] ** 2 + t_xyz[2, negXAtom - 1] ** 2
@@ -266,7 +274,15 @@ def _zero_z_for_negx(t_xyz, negXAtom):
 
 
 def _set_xaxis(xyzArray, negXAtom):
-    """Given xyz geometry with atom at origin, areturn xyz geometry with negXAtom on -x."""
+    """Given xyz geometry with atom at origin, areturn xyz geometry with negXAtom on -x.
+
+    Args:
+        xyzArray: [3xN] np.array for N atoms of geometry
+        negXAtom: integer label of atom to be positioned on -x axis
+
+    Returns:
+        [Nx3] rotated geometry with negXAtom on the xz plane
+    """
     t_xyz = xyzArray.T
 
     # define initial xyz vector lengths. Should be unchanged after rotation
@@ -289,6 +305,7 @@ def _set_xaxis(xyzArray, negXAtom):
 
 
 def _popelier_match_scores(testDict, refDict, statDict):
+    """Calculate QTMS differences between BCP dictionaries"""
     refDictKeysList = list(refDict.keys())
     testKeysList = list(testDict.keys())
     # BCP distances for first match
@@ -520,16 +537,18 @@ def rotate_substituent_aiida(
             * Minimum distance in BCP space defined the atom to put on +y
 
     Args:
-        sumFileNoExt (string): name of a sum file, without the .sum extension
+        sum_file_folder (aiida FolderData): FolderData  object containing .sum file
+        atom_dict: dict of output from get_atomic_props
+        cc_dict: dict of VSCC data
         originAtom (int): the integer number of the atom to place at the origin
         negXAtom (int): the integer number of the atom to place along the -x axis
         posYAtom (int): override for above defined +y point, set to posYAtom instead
 
     Returns:
-        pandas data frame of output geometry (columns Atom, x, y, z)
+        dictionary 'atomic_symbols' for atomic symbols and 'geom' for 3xN np.array of rotated coordinates
 
     Examples:
-        >>> rotate_substituent('SubCH3_CFH2_anti2146_reor',1,1)
+        >>> rotate_substituent('SubCH3_CFH2_anti2146_reor',1,2)
         Atom    x   y   z
         C1      0.  0.  0.
         H2 -{float} 0.  0.
@@ -601,7 +620,7 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
         pandas data frame of output geometry (columns Atom, x, y, z)
 
     Examples:
-        >>> rotate_substituent('SubCH3_CFH2_anti2146_reor',1,1)
+        >>> rotate_substituent('SubCH3_CFH2_anti2146_reor',1,2)
         Atom    x   y   z
         C1      0.  0.  0.
         H2 -{float} 0.  0.
