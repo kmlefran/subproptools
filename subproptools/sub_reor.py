@@ -655,15 +655,14 @@ def rotate_substituent_aiida(
         posYPoint = []
     if len(posYPoint) > 0:
         xyz_w_y_pt = np.append(molecule_xyz["xyz"], [posYPoint], axis=0)
-    # perform reorientation
-    molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
-    if posYAtom:
+        # perform reorientation
+        molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
         final_y = molecule_xaxis[posYAtom - 1]
-    else:
-        final_y = molecule_xaxis[-1]
-    if len(posYPoint) > 0:
         final_orientation = _set_yaxis(molecule_xaxis[0:-1], final_y)
     else:
+        molecule_xaxis = _set_xaxis(
+            _set_origin(molecule_xyz["xyz"], originAtom), negXAtom
+        )
         final_orientation = molecule_xaxis
     # Generate output
     final_orientation = final_orientation * 0.529177
@@ -730,15 +729,14 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
         posYPoint = []
     if len(posYPoint) > 0:
         xyz_w_y_pt = np.append(molecule_xyz["xyz"], [posYPoint], axis=0)
-    # perform reorientation
-    molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
-    if posYAtom:
+        # perform reorientation
+        molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
         final_y = molecule_xaxis[posYAtom - 1]
-    else:
-        final_y = molecule_xaxis[-1]
-    if len(posYPoint) > 0:
         final_orientation = _set_yaxis(molecule_xaxis[0:-1], final_y)
     else:
+        molecule_xaxis = _set_xaxis(
+            _set_origin(molecule_xyz["xyz"], originAtom), negXAtom
+        )
         final_orientation = molecule_xaxis
 
     # Generate output
