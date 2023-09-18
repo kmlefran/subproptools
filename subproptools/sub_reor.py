@@ -106,8 +106,10 @@ def _find_bcp_match(data, originAtomXYZ, negXAtomLabel, originAtomLabel, atomDic
             {bcp[0] + "-" + bcp[1]: qt.get_bcp_properties(data, atPair=bcp)}
         )
     # print(bcpPropDict)
-    if len(bcpPropDict) <= 2:
+    if len(bcpPropDict) < 2:
         clockwiseKeys = []
+    elif len(bcpPropDict) == 2:
+        clockwiseKeys = bcpPropDict
     else:
         clockwiseKeys = _find_clockwise_rot(
             bcpPropDict, originAtomLabel, negXAtomLabel, atomDict, originAtomXYZ
@@ -304,6 +306,33 @@ def _set_xaxis(xyzArray, negXAtom):
     return t_rot2.T
 
 
+def _popelier_match_scores_2(testDict, refDict, statDict):
+    """Calculate QTMS differences between BCP dictionaries"""
+    refDictKeysList = list(refDict.keys())
+    testKeysList = list(testDict.keys())
+    # BCP distances for first match
+    dif00 = _get_popelier_dif(
+        testDict[testKeysList[0]], refDict[refDictKeysList[0]], statDict
+    )
+    dif11 = _get_popelier_dif(
+        testDict[testKeysList[1]], refDict[refDictKeysList[1]], statDict
+    )
+
+    # BCP distances for second match
+    dif10 = _get_popelier_dif(
+        testDict[testKeysList[1]], refDict[refDictKeysList[0]], statDict
+    )
+
+    # BCP distances for third match
+
+    dif01 = _get_popelier_dif(
+        testDict[testKeysList[0]], refDict[refDictKeysList[1]], statDict
+    )
+
+    return [dif00 + dif11, dif10 + dif01]
+    # Total score list and index of closest space
+
+
 def _popelier_match_scores(testDict, refDict, statDict):
     """Calculate QTMS differences between BCP dictionaries"""
     refDictKeysList = list(refDict.keys())
@@ -340,6 +369,54 @@ def _popelier_match_scores(testDict, refDict, statDict):
     )
     return [dif00 + dif11 + dif22, dif10 + dif21 + dif02, dif20 + dif01 + dif12]
     # Total score list and index of closest space
+
+
+def _align_dicts_2(testDict, refDict, statDict):
+    """
+    Arguments:
+        testDict and refDict:For two dictionaries that are ordered in same rotational sense
+        statDict: scaling to use
+    Returns:
+        np.array of xyz point to use
+    """
+    # pylint:disable=too-many-branches
+    matchScores = _popelier_match_scores_2(testDict, refDict, statDict)
+    refDictKeysList = list(refDict.keys())
+    testKeysList = list(testDict.keys())
+    minInd = matchScores.index(min(matchScores))
+
+    # identify the refDict BCP that is on the +y axis
+    if (
+        refDict[refDictKeysList[0]]["xyz"][1] > 0
+        and abs(refDict[refDictKeysList[0]]["xyz"][2]) < 0.01
+    ):
+        refPosY = 0
+    elif (
+        refDict[refDictKeysList[1]]["xyz"][1] > 0
+        and abs(refDict[refDictKeysList[1]]["xyz"][2]) < 0.01
+    ):
+        refPosY = 1
+
+    # for the best match, set the posYPoint to the one that mapped to refDict +y point
+    if minInd == 0:
+        if refPosY == 0:
+            posYPoint = testDict[testKeysList[0]]["xyz"]
+        elif refPosY == 1:
+            posYPoint = testDict[testKeysList[1]]["xyz"]
+
+    elif minInd == 1:
+        if refPosY == 0:
+            posYPoint = testDict[testKeysList[1]]["xyz"]
+        elif refPosY == 1:
+            posYPoint = testDict[testKeysList[2]]["xyz"]
+
+    elif minInd == 2:
+        if refPosY == 0:
+            posYPoint = testDict[testKeysList[2]]["xyz"]
+        elif refPosY == 1:
+            posYPoint = testDict[testKeysList[0]]["xyz"]
+
+    return posYPoint
 
 
 def _align_dicts(testDict, refDict, statDict):
@@ -435,7 +512,10 @@ def _get_posy_point_aiida(
             matchDict = _get_bcp_reference(atType, len(bcpsToMatch) + 1)
             if default_stats:
                 statDict = _DEFAULT_STAT_DICT
-            posYPoint = _align_dicts(bcpsToMatch, matchDict, statDict)
+            if len(bcpsToMatch) == 3:
+                posYPoint = _align_dicts(bcpsToMatch, matchDict, statDict)
+            elif len(bcpsToMatch) == 2:
+                posYPoint = _align_dicts_2(bcpsToMatch, matchDict, statDict)
         # reorient to another point
         # posy point will be the point that would lie along the y-axis in reference in maximal match case
         # print('not done yet')
@@ -480,7 +560,10 @@ def _get_posy_point(
             matchDict = _get_bcp_reference(atType, len(bcpsToMatch) + 1)
             if default_stats:
                 statDict = _DEFAULT_STAT_DICT
-            posYPoint = _align_dicts(bcpsToMatch, matchDict, statDict)
+            if len(bcpsToMatch) == 3:
+                posYPoint = _align_dicts(bcpsToMatch, matchDict, statDict)
+            elif len(bcpsToMatch) == 2:
+                posYPoint = _align_dicts_2(bcpsToMatch, matchDict, statDict)
         # reorient to another point
         # posy point will be the point that would lie along the y-axis in reference in maximal match case
         # print('not done yet')
