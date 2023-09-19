@@ -504,7 +504,7 @@ def _get_posy_point_aiida(
         # on the assumption that if an atom has two bonds (_find_bap_match returns None),
         # and does not have a lone pair, it is linear, so we do not do another rotation
         # and posYPoint is None
-        if len(bcpsToMatch) == 0:
+        if len(bcpsToMatch) == 0 or len(bcpsToMatch) == 1:
             posYPoint = []
         else:
             atType = "".join([i for i in attachedAtom if not i.isdigit()])
@@ -552,7 +552,7 @@ def _get_posy_point(
         # on the assumption that if an atom has two bonds (_find_bap_match returns None),
         # and does not have a lone pair, it is linear, so we do not do another rotation
         # and posYPoint is None
-        if len(bcpsToMatch) == 0:
+        if len(bcpsToMatch) == 0 or len(bcpsToMatch) == 1:
             posYPoint = []
         else:
             atType = "".join([i for i in attachedAtom if not i.isdigit()])
@@ -646,7 +646,7 @@ def rotate_substituent_aiida(
     # Labels format A1 etc
     negXAtomLabel = molecule_xyz["Atoms"][negXAtom - 1]
     attachedAtom = molecule_xyz["Atoms"][originAtom - 1]
-    if not posYAtom:
+    if not posYAtom and len(molecule_xyz["Atoms"] > 2):
         posYPoint = _get_posy_point_aiida(
             data, cc_dict, atom_dict, attachedAtom, negXAtomLabel
         )
@@ -722,7 +722,7 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
     negXAtomLabel = molecule_xyz["Atoms"][negXAtom - 1]
     attachedAtom = molecule_xyz["Atoms"][originAtom - 1]
     # perform reorientation
-    if not posYAtom:
+    if not posYAtom and len(molecule_xyz["Atoms"] > 2):
         posYPoint = _get_posy_point(sumFileNoExt, atomDict, attachedAtom, negXAtomLabel)
     else:
         posYPoint = []
