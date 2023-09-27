@@ -16,6 +16,7 @@ Contents
 
    usage
    api
+   rotation_usage
 
 Indices and tables
 ==================

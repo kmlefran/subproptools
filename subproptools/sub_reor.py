@@ -1,12 +1,13 @@
 """subreor
 Module to reorient a substituent to match a defined coordinate system
- First an atom is positioned at the origin.
- By convention, this is the atom of the group that is directly bonded to the rest of the molecule.
- The rest of the molecule is placed along the -x axis. The remaining axes are defined as follows:
+First an atom is positioned at the origin.
+By convention, this is the atom of the group that is directly bonded to the rest of the molecule.
+The rest of the molecule is placed along the -x axis. The remaining axes are defined as follows:
 * if there is one lone pair(VSCC), that point lies on the +y
 * if there are two lone pairs, the average position of them lies on the +y
 * if there are no lone pairs, map the BCPs of the atom at the origin to a reference. Identify the
 closest match to the reference to determine a BCP to set as +y
+
 """
 # sys.path.append(sys.path[0].replace("subproptools", "") + "/" + "referenceMaps")
 import math  # sqrt
@@ -397,6 +398,8 @@ def _align_dicts_2(testDict, refDict, statDict):
         refPosY = 1
 
     # for the best match, set the posYPoint to the one that mapped to refDict +y point
+    # if first element of match scores, 0 of ref maps to 0 of test. If second element,
+    # 1 of ref maps to 0 of test
     if minInd == 0:
         if refPosY == 0:
             posYPoint = testDict[testKeysList[0]]["xyz"]
@@ -407,13 +410,13 @@ def _align_dicts_2(testDict, refDict, statDict):
         if refPosY == 0:
             posYPoint = testDict[testKeysList[1]]["xyz"]
         elif refPosY == 1:
-            posYPoint = testDict[testKeysList[2]]["xyz"]
-
-    elif minInd == 2:
-        if refPosY == 0:
-            posYPoint = testDict[testKeysList[2]]["xyz"]
-        elif refPosY == 1:
             posYPoint = testDict[testKeysList[0]]["xyz"]
+
+    # elif minInd == 2:
+    #     if refPosY == 0:
+    #         posYPoint = testDict[testKeysList[2]]["xyz"]
+    #     elif refPosY == 1:
+    #         posYPoint = testDict[testKeysList[0]]["xyz"]
 
     return posYPoint
 
@@ -609,15 +612,6 @@ def rotate_substituent_aiida(
     """
     Rotates a substituent to the defined coordinate system.
 
-    Coordinate system defined as:
-        originAtom at (0,0,0)
-        negXAtom at (-x,0,0)
-        Atom on +y defined as:
-            * average of lone pairs for 2 lone pairs on originAtom
-            * Position of lone pair for 1 lone pair on originAtom
-            * For no lone pairs: map BCPs onto reference for the atom type
-            * Minimum distance in BCP space defined the atom to put on +y
-
     Args:
         sum_file_folder (aiida FolderData): FolderData  object containing .sum file
         atom_dict: dict of output from get_atomic_props
@@ -637,6 +631,17 @@ def rotate_substituent_aiida(
         .(remaining geometry)
         .
         .
+
+    Notes:
+        Coordinate system defined as:
+        originAtom at (0,0,0)
+        negXAtom at (-x,0,0)
+        Atom on +y defined as:
+        average of lone pairs for 2 lone pairs on originAtom
+        Position of lone pair for 1 lone pair on originAtom
+        For no lone pairs: map BCPs onto reference for the atom type
+        Minimum distance in BCP space defined the atom to put on +y
+
     """
     # pylint:disable=too-many-locals
     # read sum file
@@ -682,15 +687,6 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
     """
     Rotates a substituent to the defined coordinate system.
 
-    Coordinate system defined as:
-        originAtom at (0,0,0)
-        negXAtom at (-x,0,0)
-        Atom on +y defined as:
-            * average of lone pairs for 2 lone pairs on originAtom
-            * Position of lone pair for 1 lone pair on originAtom
-            * For no lone pairs: map BCPs onto reference for the atom type
-            * Minimum distance in BCP space defined the atom to put on +y
-
     Args:
         sumFileNoExt (string): name of a sum file, without the .sum extension
         originAtom (int): the integer number of the atom to place at the origin
@@ -708,6 +704,17 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
         .(remaining geometry)
         .
         .
+
+    Notes:
+        Coordinate system defined as:
+        originAtom at (0,0,0)
+        negXAtom at (-x,0,0)
+        Atom on +y defined as:
+        average of lone pairs for 2 lone pairs on originAtom
+        Position of lone pair for 1 lone pair on originAtom
+        For no lone pairs: map BCPs onto reference for the atom type
+        Minimum distance in BCP space defined the atom to put on +y
+
     """
     # pylint:disable=too-many-locals
     # read sum file
@@ -832,20 +839,20 @@ def rotate_sheet(
     Args:
         csv_file - csv file containining these columns:
         Substituent, originAtom, negXAtom, posYAtom, charge, multiplicity,  label1, label2,...
-            Substituent: string label for substituent
-            originAtom: numerical index(starting form 1) of atom to use as origin
-            negXAtom: numerical index(starting form 1) of atom to place on -x
-            posYAtom: usually 0, but if override desired, numerical index(starting form 1) of atom to place on +y
-            charge: charge of the molecule
-            multiplicity: multiplicity of the molecule
-            label1, label2... label depicting situation for molecule(substrate, method)
-                e.g. "SubH", "B3LYP/cc-pvDZ" etc
+        Substituent: string label for substituent
+        originAtom: numerical index(starting form 1) of atom to use as origin
+        negXAtom: numerical index(starting form 1) of atom to place on -x
+        posYAtom: usually 0, but if override desired, numerical index(starting form 1) of atom to place on +y
+        charge: charge of the molecule
+        multiplicity: multiplicity of the molecule
+        label1, label2... label depicting situation for molecule(substrate, method) e.g. "SubH", "B3LYP/cc-pvDZ" etc
         esm: electronic structure method (HF/MP2/DFT functional/etc)
         basis: string for basis to be used
         n_procs: number of processors for use on Cedar, default to 4
         mem: memory to use on Cedar, default to 3200MB
         wfx: if we wish to write wfx, default True
         extra_label: an additional label for the reoriented file if needed, default none
+
     Returns:
         no return value, but outputs to gjf files in working directory(or directory in path of filenames)
 
