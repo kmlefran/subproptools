@@ -471,7 +471,7 @@ def get_atom_vscc(
     return vscc_dict
 
 
-def _is_on_line(lineStartList, lineEndList, pointToCheckList, epsilon=0.1):
+def _is_on_line(lineStartList, lineEndList, pointToCheckList, epsilon=0.2):
     """Given 3d coords for start of line, end of line and point to check, sees if pointToCheck is on line"""
     # line connecting atoms: (x1 + t(x2-x1),y1 + t(y2-y1),z1 + t(z2-z1))
     # to reconstruct - create equations of lines. (pointToCheck-pointWitht) and (lineStart-pointWitht)
