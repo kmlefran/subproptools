@@ -97,7 +97,9 @@ def _get_bcp_block(data, atPair=["C1", "H2"]):  # pylint:disable=dangerous-defau
             _search_str(data, word=f"Type = (3,-1) BCP {atPair[1]} {atPair[0]}") - 1
         )
     if bcpStart == -2:
-        raise ValueError(f"BCP between {atPair[0]} and {atPair[1]} not found in file")
+        raise ValueError(
+            f"BCP between {atPair[0]} and {atPair[1]} not found in {data[12]}"
+        )
     bcpEnd = bcpStart + 34
     bcpBlock = data[bcpStart:bcpEnd]
     return bcpBlock  # return the lines of the BCP data

@@ -5,18 +5,27 @@
 
 Welcome to subproptools's documentation!
 ========================================
-.. automodule::subproptools.qtaim_extract
-   :members:
+.. automodule:: subproptools
 
-Contents
---------
+.. toctree::
+   :maxdepth: 2
+   :caption: Getting Started:
+
+   start
+   tips
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    usage
-   api
    rotation_usage
+
+.. toctree::
+   :maxdepth: 2
+   :caption: subproptools API:
+
+   api
 
 Indices and tables
 ==================

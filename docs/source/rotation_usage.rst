@@ -1,5 +1,5 @@
-Usage
-=====
+Rotation Usage
+==============
 
 Installation
 ------------

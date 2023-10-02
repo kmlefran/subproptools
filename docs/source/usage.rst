@@ -1,5 +1,5 @@
-Usage
-=====
+Property Extraction Usage
+=========================
 
 Installation
 ------------
