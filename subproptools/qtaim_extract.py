@@ -479,34 +479,27 @@ def _is_on_line(lineStartList, lineEndList, pointToCheckList, epsilon=0.3):
     # to reconstruct - create equations of lines. (pointToCheck-pointWitht) and (lineStart-pointWitht)
     # dot product of those vectors should be 0(closest point is. 90 degrees)
     # rearrange to solve for t
-    t = (
-        (pointToCheckList[0] - lineStartList[0]) * (lineEndList[0] - lineStartList[0])
-        + (pointToCheckList[1] - lineStartList[1]) * (lineEndList[1] - lineStartList[1])
-        + (pointToCheckList[2] - lineStartList[2]) * (lineEndList[2] - lineStartList[2])
-    ) / (
+    st_end_mag = math.sqrt(
         ((lineEndList[2] - lineStartList[2]) ** 2)
         + ((lineEndList[1] - lineStartList[1]) ** 2)
         + ((lineEndList[0] - lineStartList[0]) ** 2)
     )
+    t = (
+        (pointToCheckList[0] - lineStartList[0]) * (lineEndList[0] - lineStartList[0])
+        + (pointToCheckList[1] - lineStartList[1]) * (lineEndList[1] - lineStartList[1])
+        + (pointToCheckList[2] - lineStartList[2]) * (lineEndList[2] - lineStartList[2])
+    ) / st_end_mag
     perpPoint = np.array(
         [
-            lineStartList[0] + t * (lineEndList[0] - lineStartList[0]),
-            lineStartList[1] + t * (lineEndList[1] - lineStartList[1]),
-            lineStartList[2] + t * (lineEndList[2] - lineStartList[2]),
+            lineStartList[0] + t * (lineEndList[0] - lineStartList[0]) / st_end_mag,
+            lineStartList[1] + t * (lineEndList[1] - lineStartList[1]) / st_end_mag,
+            lineStartList[2] + t * (lineEndList[2] - lineStartList[2]) / st_end_mag,
         ]
     )
-    # get distance between test point and closest line point
-    lowX = min(lineStartList[0], lineEndList[0])
-    highX = max(lineStartList[0], lineEndList[0])
-    lowY = min(lineStartList[1], lineEndList[1])
-    highY = max(lineStartList[1], lineEndList[1])
-    lowZ = min(lineStartList[2], lineEndList[2])
-    highZ = max(lineStartList[2], lineEndList[2])
+
     # if t is between the end points of the line, and the pointToCheck is within epsilon of that point, it is a bonded cc
-    in_x = perpPoint[0] >= lowX and perpPoint[0] <= highX
-    in_y = perpPoint[1] >= lowY and perpPoint[1] <= highY
-    in_z = perpPoint[2] >= lowZ and perpPoint[2] <= highZ
-    if in_x and in_y and in_z and _get_dist(pointToCheckList, perpPoint) < epsilon:
+
+    if 0 < t < st_end_mag and _get_dist(pointToCheckList, perpPoint) < epsilon:
         return True
     return False
 

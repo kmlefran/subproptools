@@ -496,7 +496,14 @@ def _get_posy_point_aiida(
     elif len(vscc) == 2 and "N" not in attachedAtom:
         vkeys = list(vscc.keys())
 
-        posYPoint = (vscc[vkeys[0]]["xyz"] + vscc[vkeys[1]]["xyz"]) / 2
+        posYPoint = [
+            x / 2
+            for x in [
+                vscc[vkeys[0]]["xyz"][0] + vscc[vkeys[1]]["xyz"][0],
+                vscc[vkeys[0]]["xyz"][1] + vscc[vkeys[1]]["xyz"][1],
+                vscc[vkeys[0]]["xyz"][2] + vscc[vkeys[1]]["xyz"][2],
+            ]
+        ]
         # reorient to average of vscc points for +y
     else:
         # bcpsToMatch is bcp dictionary, ordered for clockwise rot
@@ -540,7 +547,14 @@ def _get_posy_point(
     elif len(vscc) == 2 and "N" not in attachedAtom:
         vkeys = list(vscc.keys())
 
-        posYPoint = (vscc[vkeys[0]]["xyz"] + vscc[vkeys[1]]["xyz"]) / 2
+        posYPoint = [
+            x / 2
+            for x in [
+                vscc[vkeys[0]]["xyz"][0] + vscc[vkeys[1]]["xyz"][0],
+                vscc[vkeys[0]]["xyz"][1] + vscc[vkeys[1]]["xyz"][1],
+                vscc[vkeys[0]]["xyz"][2] + vscc[vkeys[1]]["xyz"][2],
+            ]
+        ]
         # reorient to average of vscc points for +y
     else:
         with open(sumFileNoExt + ".sum", encoding="utf-8") as sumFile:
