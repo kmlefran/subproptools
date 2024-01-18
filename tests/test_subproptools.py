@@ -6,17 +6,21 @@ import os
 
 import numpy as np  # arrays
 import pandas as pd  # data frames
-import pkg_resources
 
 from subproptools import qtaim_extract as qt
+
+# import pkg_resources
+
 
 # from subproptools import qtaim_extract as qt
 
 
 def load_sumfile(filename):
     """Test loading a file"""
-    stream = pkg_resources.resource_stream(__name__, "test_data/" + filename + ".sum")
-    return stream.readlines()
+    fname = os.getcwd() + "/" + "test_data" + "/" + filename + ".sum"
+    with open(fname, encoding="utf-8") as f:
+        data = f.readlines()
+    return data
 
 
 def test_atomic_properties():
@@ -25,15 +29,10 @@ def test_atomic_properties():
     atomic_properties = qt.get_atomic_props(data)
     assert isinstance(atomic_properties, dict)
     assert len(atomic_properties.keys()) == 8
+    assert "N1" in atomic_properties
     assert (
-        "N1" in atomic_properties.keys()  # pylint:disable=consider-iterating-dictionary
+        "q" in atomic_properties["N1"]
     )  # pylint:disable=consider-iterating-dictionary
-    assert (
-        "q"
-        in atomic_properties[
-            "N1"
-        ].keys()  # pylint:disable=consider-iterating-dictionary
-    )
 
 
 def test_bcp_properties():
