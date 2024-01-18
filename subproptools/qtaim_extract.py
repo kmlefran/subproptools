@@ -24,6 +24,52 @@ def _search_str(
     return wordLine
 
 
+def _get_li_or_di(atom_label, lab, di_table, li_table):
+    """Returns LI(atom_label) if atom_label==lab or DI(atom_label,lab)/2 if atom_label!=lab"""
+    if lab == atom_label:
+        li_id = li_table.index[li_table["Atom"] == lab][0]
+        res = float(li_table.at[li_id, "LI(A)"])
+    else:
+        # check for both cases, where atom_label is in Atom A or where it is in Atom B
+        atom_in_A = (di_table["Atom A"] == atom_label) & (di_table["Atom B"] == lab)
+        atom_in_B = (di_table["Atom B"] == atom_label) & (di_table["Atom A"] == lab)
+        di_id = di_table.index[atom_in_A | atom_in_B][0]
+        res = (
+            float(di_table.at[di_id, "DI(A,B)"]) / 2
+        )  # divided by 2 from Matta's definition of LDM
+    return res
+
+
+def _get_ldm_column(atom_label, di_table, li_table):
+    """Gets a column of the LDM given the atom label of the column"""
+    out_list = []
+    atom_labels = list(li_table["Atom"])
+    out_list = [
+        _get_li_or_di(atom_label, lab, di_table, li_table) for lab in atom_labels
+    ]
+    return out_list
+
+
+def get_ldm(data: list[str]) -> pd.DataFrame:
+    """Given lines of sum file, returns the LDM as defined by Matta
+
+    Args:
+        data: lines of a .sum file
+
+    Returns:
+        pd.DataFrame of the LDM. LIs on diagonals, DI/2 on off diagonals"""
+    di_table = _get_di_table(data)
+    li_table = _get_table(
+        data=data,
+        tableHeader="N(A)             LI(A)            %Loc(A)          DI(A,A')/2       %Deloc(A,A')",
+    )
+    atom_labels = li_table["Atom"]
+    out_frame = pd.DataFrame(index=atom_labels)
+    for atom_label in atom_labels:
+        out_frame[atom_label] = _get_ldm_column(atom_label, di_table, li_table)
+    return out_frame
+
+
 def _get_di_table(
     data: list[str],
 ) -> pd.DataFrame:
