@@ -104,7 +104,7 @@ def test_get_atom_vscc(filepath_tests):
         filepath_tests
         / "test_data"
         / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles"
-        / "O4.agpviz"
+        / "o4.agpviz"
     )
     with open(file_with_relpath, encoding="utf-8") as f:
         data = f.readlines()
@@ -126,7 +126,7 @@ def test_get_sub_props(filepath_tests):
     sub_props = qt.get_sub_props(
         atomic_properties,
         [1, 3, 4, 5, 6, 7, 8],
-        ["N1", "H3", "O4", "C5", "H6", "H7", "H8"],
+        ["N1", "H2", "H3", "O4", "C5", "H6", "H7", "H8"],
     )
     assert isinstance(sub_props, dict)
 
@@ -144,7 +144,7 @@ def test_extract_sub_props(filepath_tests):
         + "test_data"
         + "/"
         + "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor",
-        lapRhoCpAtoms=["O4"],
+        lapRhoCpAtoms=[4],
     )
     assert isinstance(sub_props, dict)
     assert "Group" in sub_props
@@ -172,6 +172,28 @@ def test_extract_requested_cc_props(filepath_tests):
     assert len(vscc_props) == 2
     assert len(vscc_props["N1"]) == 0
     assert len(vscc_props["O4"]) == 3
+
+
+def test_get_selected_bcps(filepath_tests):
+    """Test get_selected_bcps"""
+    data = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    bcp_dict = qt.get_selected_bcps(data, [["N1", "H2"], ["N1", "H3"]])
+    assert isinstance(bcp_dict, dict)
+    assert len(bcp_dict) == 2
+    assert "N1-H2" in bcp_dict
+    assert "N1-H3" in bcp_dict
+
+
+def test_find_connected(filepath_tests):
+    """Test find_connected"""
+    data = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    con = qt.find_connected(data, "H2", "N1")
+    assert isinstance(con, list)
+    assert len(con) == 2
 
 
 def test_extract_requested_bcp_props(filepath_tests):
