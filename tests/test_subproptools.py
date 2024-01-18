@@ -83,11 +83,15 @@ def test_get_cc_props(filepath_tests):
     file_with_relpath = (
         filepath_tests
         / "test_data"
-        / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor"
-        / "_atomicfiles"
+        / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles"
         / "n1.agpviz"
     )
     with open(file_with_relpath, encoding="utf-8") as f:
         data = f.readlines()
     cc_props = qt.get_cc_props(data, "N1", is_lines_data=True)
     assert isinstance(cc_props, dict)
+    assert len(cc_props) == 5
+    assert "xyz" in cc_props[1]
+    assert "rho" in cc_props[1]
+    assert "delsqrho" in cc_props[1]
+    assert "distFromNuc" in cc_props[1]
