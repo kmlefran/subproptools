@@ -1130,4 +1130,7 @@ def get_xyz(data: list[str]) -> dict:
     xyzTable["X"] = pd.to_numeric(xyzTable["X"], downcast="float")
     xyzTable["Y"] = pd.to_numeric(xyzTable["Y"], downcast="float")
     xyzTable["Z"] = pd.to_numeric(xyzTable["Z"], downcast="float")
-    return {"xyz": xyzTable[["X", "Y", "Z"]].to_numpy(), "Atoms": xyzTable["Atom"]}
+    return {
+        "xyz": xyzTable[["X", "Y", "Z"]].to_numpy(),
+        "Atoms": list(xyzTable["Atom"]),
+    }
