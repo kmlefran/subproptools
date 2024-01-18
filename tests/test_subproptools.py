@@ -183,7 +183,7 @@ def test_extract_requested_bcp_props(filepath_tests):
     bcp_props = qt.extract_requested_bcp_props(
         data,
         ["N1", "H2", "H3", "O4", "C5", "H6", "H7", "H8"],
-        [["N1", "H2"], ["N1", "H3"]],
+        [[1, 2], [1, 3]],
         ["N1", "H3", "O4", "C5", "H6", "H7", "H8"],
         atomic_properties,
     )

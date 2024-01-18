@@ -4,10 +4,11 @@ Tools for extracting data from sum files(and CC from agpviz), and calculating su
 # pylint:disable=too-many-lines
 import ast
 import math  # sqrt
-import os  # file system stuff
 
 import numpy as np  # arrays
 import pandas as pd  # data frames
+
+# import os  # file system stuff
 
 
 def _search_str(
@@ -568,7 +569,9 @@ def get_cc_props(filename, atomLabel: str, is_lines_data: bool = False) -> dict:
     """
     if not is_lines_data:
         # example dir name SubH_CCF-ReorPosY-B3LYP-def2-TZVPPD-Field_atomicfiles
-        pathToSubdir = os.getcwd() + "/" + filename + "_atomicfiles" + "/"
+        pathToSubdir = (
+            filename + "_atomicfiles" + "/"
+        )  # removed os.getcwd() + "/" from start
         with open(
             pathToSubdir + atomLabel.lower() + ".agpviz", encoding="utf-8"
         ) as atFile:
@@ -878,7 +881,7 @@ def extract_requested_cc_props(
 def extract_requested_bcp_props(
     data: list[str],
     atomList: list[str],
-    bcpId: list[list[str]],
+    bcpId: list[list[int]],
     subatomLabels: list[str],
     atomicProps: dict,
 ) -> dict:
