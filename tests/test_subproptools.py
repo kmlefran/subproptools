@@ -2,7 +2,6 @@
 # import math  # sqrt
 # import os  # file system stuff
 
-import os
 
 import numpy as np  # arrays
 import pandas as pd  # data frames
@@ -79,10 +78,10 @@ def test_get_sub_di(filepath_tests):
     assert sub_di > 0
 
 
-def test_get_cc_props():
+def test_get_cc_props(filepath_tests):
     """Test that getting charge concentration properties returns a dict"""
     file_with_relpath = (
-        os.getcwd() + "/" + "test_data" + "/" + "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor"
+        filepath_tests / "test_data" / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor"
     )
     cc_props = qt.get_cc_props(file_with_relpath, "N1")
     assert isinstance(cc_props, dict)
