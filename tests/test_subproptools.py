@@ -15,17 +15,17 @@ from subproptools import qtaim_extract as qt
 # from subproptools import qtaim_extract as qt
 
 
-def load_sumfile(filename):
+def load_sumfile(filepath_tests, filename):
     """Test loading a file"""
-    fname = os.getcwd() + "/" + "test_data" + "/" + filename + ".sum"
+    fname = filepath_tests + "/" + "test_data" + "/" + filename + ".sum"
     with open(fname, encoding="utf-8") as f:
         data = f.readlines()
     return data
 
 
-def test_atomic_properties():
+def test_atomic_properties(filepath_tests):
     """Test building atomic properties"""
-    data = load_sumfile("SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
+    data = load_sumfile(filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
     atomic_properties = qt.get_atomic_props(data)
     assert isinstance(atomic_properties, dict)
     assert len(atomic_properties.keys()) == 8
@@ -35,16 +35,16 @@ def test_atomic_properties():
     )  # pylint:disable=consider-iterating-dictionary
 
 
-def test_bcp_properties():
+def test_bcp_properties(filepath_tests):
     """Test extraction of bcp properties"""
-    data = load_sumfile("SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
+    data = load_sumfile(filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
     bcp_properties = qt.get_bcp_properties(data, ["N1", "H2"])
     assert isinstance(bcp_properties, dict)
 
 
-def test_ldm():
+def test_ldm(filepath_tests):
     """Test constuction of the LDM matrix"""
-    data = load_sumfile("SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
+    data = load_sumfile(filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
     ldm = qt.get_ldm(data)
     a_props = {  # dummy atomic property data
         "N1": {"q": -0.41769231890},  # actual charge
@@ -63,9 +63,9 @@ def test_ldm():
     assert np.abs(7 - np.sum(ldm["N1"]) - a_props["N1"]["q"]) < 0.01
 
 
-def test_get_sub_di():
+def test_get_sub_di(filepath_tests):
     """Test that getting substituent di returns a float"""
-    data = load_sumfile("SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
+    data = load_sumfile(filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor")
     sub_di = qt.get_sub_di(data, ["N1", "H3", "O4", "C5"])
     assert isinstance(sub_di, float)
     assert sub_di > 0
