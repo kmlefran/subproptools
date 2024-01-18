@@ -78,6 +78,120 @@ def test_get_sub_di(filepath_tests):
     assert sub_di > 0
 
 
+def test_no_vscc_in_ammonium(filepath_tests):
+    """Test filtering the charge concentrations for VSCC"""
+    file_with_relpath = (
+        filepath_tests
+        / "test_data"
+        / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles"
+        / "n1.agpviz"
+    )
+    with open(file_with_relpath, encoding="utf-8") as f:
+        data = f.readlines()
+    cc_props = qt.get_cc_props(data, "N1", is_lines_data=True)
+    data = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    atomic_properties = qt.get_atomic_props(data)
+    vscc_props = qt.identify_vscc(cc_props, atomic_properties, "N1")
+    assert isinstance(vscc_props, dict)
+    assert len(vscc_props) == 0
+
+
+def test_get_atom_vscc(filepath_tests):
+    """Test get_atom_vscc"""
+    file_with_relpath = (
+        filepath_tests
+        / "test_data"
+        / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles"
+        / "O4.agpviz"
+    )
+    with open(file_with_relpath, encoding="utf-8") as f:
+        data = f.readlines()
+    data2 = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    atomic_properties = qt.get_atomic_props(data2)
+    vscc = qt.get_atom_vscc(data, "O4", atomic_properties, True)
+    assert isinstance(vscc, dict)
+    assert len(vscc) == 3
+
+
+def test_get_sub_props(filepath_tests):
+    """Test get_sub_props"""
+    data = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    atomic_properties = qt.get_atomic_props(data)
+    sub_props = qt.get_sub_props(
+        atomic_properties,
+        [1, 3, 4, 5, 6, 7, 8],
+        ["N1", "H3", "O4", "C5", "H6", "H7", "H8"],
+    )
+    assert isinstance(sub_props, dict)
+
+
+def test_extract_sub_props(filepath_tests):
+    """Text extract_sub_props"""
+    data = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    sub_props = qt.extract_sub_props(
+        data,
+        [1, 3, 4, 5, 6, 7, 8],
+        str(filepath_tests)
+        + "/"
+        + "test_data"
+        + "/"
+        + "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor",
+        lapRhoCpAtoms=["O4"],
+    )
+    assert isinstance(sub_props, dict)
+    assert "Group" in sub_props
+    assert "Atomic" in sub_props
+    assert "BCP" in sub_props
+    assert "VSCC" in sub_props
+
+
+def test_extract_requested_cc_props(filepath_tests):
+    """Test extract_requested_cc_props"""
+    data = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    atomic_properties = qt.get_atomic_props(data)
+    vscc_props = qt.extract_requested_cc_props(
+        [1, 4],
+        str(filepath_tests)
+        + "/"
+        + "test_data"
+        + "/"
+        + "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor",
+        ["N1", "H2", "H3", "O4", "C5", "H6", "H7", "H8"],
+        atomic_properties,
+    )
+    assert len(vscc_props) == 2
+    assert len(vscc_props["N1"]) == 0
+    assert len(vscc_props["O4"]) == 3
+
+
+def test_extract_requested_bcp_props(filepath_tests):
+    """Test extract_requested_bcp_props"""
+    data = load_sumfile(
+        filepath_tests, filename="SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor.sum"
+    )
+    atomic_properties = qt.get_atomic_props(data)
+    bcp_props = qt.extract_requested_bcp_props(
+        data,
+        ["N1", "H2", "H3", "O4", "C5", "H6", "H7", "H8"],
+        [["N1", "H2"], ["N1", "H3"]],
+        ["N1", "H3", "O4", "C5", "H6", "H7", "H8"],
+        atomic_properties,
+    )
+    assert isinstance(bcp_props, dict)
+    assert "N1-H2" in bcp_props
+    assert "N1-H3" in bcp_props
+
+
 def test_get_cc_props(filepath_tests):
     """Test that getting charge concentration properties returns a dict"""
     file_with_relpath = (
