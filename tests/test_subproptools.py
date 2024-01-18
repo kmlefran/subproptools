@@ -226,7 +226,7 @@ def test_sub_prop_frame(filepath_tests):
     df = pd.DataFrame(
         {
             "Substituent": ["NHOCH3"],
-            "subAtoms": [1, 3, 4, 5, 6, 7, 8],
+            "subAtoms": ["1 3 4 5 6 7 8"],
             "SubH": [
                 str(filepath_tests)
                 + "/"
