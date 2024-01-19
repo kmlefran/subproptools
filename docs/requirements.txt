@@ -1,6 +1,7 @@
 sphinx
 sphinxcontrib-contentui
 sphinxcontrib-details-directive
+sphinx-rtd-theme
 furo
 markupsafe<2.1
 pandas
