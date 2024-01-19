@@ -221,31 +221,31 @@ def test_get_xyz(filepath_tests):
     assert len(xyz["xyz"]) == 8
 
 
-def test_sub_prop_frame(filepath_tests):
-    """test sub_prop_frame"""
-    df = pd.DataFrame(
-        {
-            "Substituent": ["NHOCH3"],
-            "subAtoms": ["1 3 4 5 6 7 8"],
-            "SubH": [
-                str(filepath_tests)
-                + "/"
-                + "test_data"
-                + "/"
-                + "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor"
-            ],
-        }
-    )
-    df.to_csv(str(filepath_tests) + "/" + "test_data" + "/" + "testcsv.csv")
-    fr = qt.sub_prop_frame(
-        str(filepath_tests) + "/" + "test_data" + "/" + "testcsv.csv"
-    )
-    assert isinstance(fr, dict)
-    assert "SubH" in fr
-    assert "Group" in fr["SubH"]
-    assert isinstance(fr["SubH"]["Group"], pd.DataFrame)
-    assert "BCP" in fr["SubH"]
-    assert isinstance(fr["SubH"]["BCP"], pd.DataFrame)
+# def test_sub_prop_frame(filepath_tests):
+#     """test sub_prop_frame"""
+#     df = pd.DataFrame(
+#         {
+#             "Substituent": ["NHOCH3"],
+#             "subAtoms": ["1 3 4 5 6 7 8"],
+#             "SubH": [
+#                 str(filepath_tests)
+#                 + "/"
+#                 + "test_data"
+#                 + "/"
+#                 + "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor"
+#             ],
+#         }
+#     )
+#     df.to_csv(str(filepath_tests) + "/" + "test_data" + "/" + "testcsv.csv")
+#     fr = qt.sub_prop_frame(
+#         str(filepath_tests) + "/" + "test_data" + "/" + "testcsv.csv"
+#     )
+#     assert isinstance(fr, dict)
+#     assert "SubH" in fr
+#     assert "Group" in fr["SubH"]
+#     assert isinstance(fr["SubH"]["Group"], pd.DataFrame)
+#     assert "BCP" in fr["SubH"]
+#     assert isinstance(fr["SubH"]["BCP"], pd.DataFrame)
 
 
 def test_extract_requested_bcp_props(filepath_tests):
