@@ -2,7 +2,7 @@
 [![ci](https://github.com/kmlefran/subproptools/actions/workflows/ci.yml/badge.svg)](https://github.com/kmlefran/subproptools/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/subproptools/badge/?version=latest)](https://subproptools.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/kmlefran/subproptools/badge.svg?branch=main)](https://coveralls.io/github/kmlefran/subproptools?branch=main)
-[![PyPI version](https://pypi.org/project/subproptools/)](https://pypi.org/project/subproptools/)
+[![PyPI version](https://badge.fury.io/py/subproptools.svg)](https://badge.fury.io/py/subproptools)
 # Molecule Reorientation and .sum file handling
 
 This package provides tools to extract data from .sum files (in the qtaimExtract module), and tools to reorient the molecule to defined coordinate systems (in the subreor module). The subreor module rotates to a defined coordinate system. First an atom is positioned at the origin. By convention, this is the atom of the group that is directly bonded to the rest of the molecule. The rest of the molecule is placed along the -x axis. The remaining axes are defined as follows:
