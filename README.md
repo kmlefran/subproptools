@@ -1,6 +1,7 @@
 
 [![ci](https://github.com/kmlefran/subproptools/actions/workflows/ci.yml/badge.svg)](https://github.com/kmlefran/subproptools/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/subproptools/badge/?version=latest)](https://subproptools.readthedocs.io/en/latest/?badge=latest)
+[![Coverage Status](https://coveralls.io/repos/github/kmlefran/subproptools/badge.svg?branch=main)](https://coveralls.io/github/kmlefran/subproptools?branch=main)
 [![PyPI version][pypi-badge]](https://pypi.org/project/subproptools/)
 # Molecule Reorientation and .sum file handling
 
