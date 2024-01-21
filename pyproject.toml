@@ -34,9 +34,11 @@ Source = "https://github.com/kmlefran/subproptools"
 testing = [
     "pgtest~=1.3.1",
     "wheel~=0.31",
-    "coverage[toml]",
+    "coverage",
     "pytest~=6.0",
     "pytest-cov"
+    "pytest-regressions~=2.3",
+    "coveralls"
 ]
 pre-commit = [
     "pre-commit~=2.2",
@@ -73,10 +75,10 @@ filterwarnings = [
     "ignore::DeprecationWarning:yaml:",
 ]
 
-[tool.coverage.run]
+#[tool.coverage.run]
 # Configuration of [coverage.py](https://coverage.readthedocs.io)
 # reporting which lines of your plugin are covered by tests
-source=["subproptools"]
+#source=["subproptools"]
 
 [tool.isort]
 # Configuration of [isort](https://isort.readthedocs.io)
