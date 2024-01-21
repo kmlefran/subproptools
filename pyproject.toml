@@ -36,7 +36,7 @@ testing = [
     "wheel~=0.31",
     "coverage",
     "pytest~=6.0",
-    "pytest-cov"
+    "pytest-cov",
     "pytest-regressions~=2.3",
     "coveralls"
 ]
