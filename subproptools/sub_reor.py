@@ -677,6 +677,8 @@ def rotate_substituent_aiida(
         molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
         final_y = molecule_xaxis[posYAtom - 1]
         final_orientation = _set_yaxis(molecule_xaxis[0:-1], final_y)
+    elif posYAtom:
+        posYPoint = molecule_xyz["xyz"][posYAtom - 1]
     else:
         molecule_xaxis = _set_xaxis(
             _set_origin(molecule_xyz["xyz"], originAtom), negXAtom
@@ -745,9 +747,13 @@ def rotate_substituent(sumFileNoExt, originAtom, negXAtom, posYAtom=0):
     # perform reorientation
     if not posYAtom and len(molecule_xyz["Atoms"]) > 2:
         posYPoint = _get_posy_point(sumFileNoExt, atomDict, attachedAtom, negXAtomLabel)
+    elif posYAtom:
+        posYPoint = molecule_xyz["xyz"][posYAtom - 1]
     else:
         posYPoint = []
     if len(posYPoint) > 0:
+        print(molecule_xyz["xyz"])
+        print(posYPoint)
         xyz_w_y_pt = np.append(molecule_xyz["xyz"], [posYPoint], axis=0)
         # perform reorientation
         molecule_xaxis = _set_xaxis(_set_origin(xyz_w_y_pt, originAtom), negXAtom)
@@ -856,7 +862,7 @@ def rotate_sheet(
         Substituent: string label for substituent
         originAtom: numerical index(starting form 1) of atom to use as origin
         negXAtom: numerical index(starting form 1) of atom to place on -x
-        posYAtom: usually 0, but if override desired, numerical index(starting form 1) of atom to place on +y
+        posYAtom: usually 0, but override if desired, numerical index(starting form 1) of atom to place on +y
         charge: charge of the molecule
         multiplicity: multiplicity of the molecule
         label1, label2... label depicting situation for molecule(substrate, method) e.g. "SubH", "B3LYP/cc-pvDZ" etc
