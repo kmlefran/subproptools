@@ -1,7 +1,6 @@
 """Tests to ensure the subproptools module works as intended"""
 # import math  # sqrt
-# import os  # file system stuff
-
+import os  # file system stuff
 
 import numpy as np  # arrays
 import pandas as pd  # data frames
@@ -16,7 +15,7 @@ from subproptools import qtaim_extract as qt
 
 def load_sumfile(filepath_tests, filename):
     """Test loading a file"""
-    fname = filepath_tests + "test_data" / filename
+    fname = os.path.join(filepath_tests, "test_data", filename)
     with open(fname, encoding="utf-8") as f:
         data = f.readlines()
     return data
@@ -80,11 +79,11 @@ def test_get_sub_di(filepath_tests):
 
 def test_no_vscc_in_ammonium(filepath_tests):
     """Test filtering the charge concentrations for VSCC"""
-    file_with_relpath = (
-        filepath_tests
-        / "test_data"
-        / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles"
-        / "n1.agpviz"
+    file_with_relpath = os.path.join(
+        filepath_tests,
+        "test_data",
+        "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles",
+        "n1.agpviz",
     )
     with open(file_with_relpath, encoding="utf-8") as f:
         data = f.readlines()
@@ -100,12 +99,13 @@ def test_no_vscc_in_ammonium(filepath_tests):
 
 def test_get_atom_vscc(filepath_tests):
     """Test get_atom_vscc"""
-    file_with_relpath = (
-        filepath_tests
-        / "test_data"
-        / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles"
-        / "o4.agpviz"
+    file_with_relpath = os.path.join(
+        filepath_tests,
+        "test_data",
+        "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles",
+        "o4.agpviz",
     )
+
     with open(file_with_relpath, encoding="utf-8") as f:
         data = f.readlines()
     data2 = load_sumfile(
@@ -268,12 +268,13 @@ def test_extract_requested_bcp_props(filepath_tests):
 
 def test_get_cc_props(filepath_tests):
     """Test that getting charge concentration properties returns a dict"""
-    file_with_relpath = (
-        filepath_tests
-        / "test_data"
-        / "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles"
-        / "n1.agpviz"
+    file_with_relpath = os.path.join(
+        filepath_tests,
+        "test_data",
+        "SubH_NHOCH3_wb97xd_aug-cc-pvtz_reor_atomicfiles",
+        "n1.agpviz",
     )
+
     with open(file_with_relpath, encoding="utf-8") as f:
         data = f.readlines()
     cc_props = qt.get_cc_props(data, "N1", is_lines_data=True)
