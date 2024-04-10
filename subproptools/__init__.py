@@ -11,4 +11,4 @@ contains tools for rotating substituents to the desired coordinate system.
     https://www.lakeheadu.ca/users/M/rmawhinn
 """
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"

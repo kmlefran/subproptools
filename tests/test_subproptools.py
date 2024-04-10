@@ -16,7 +16,7 @@ from subproptools import qtaim_extract as qt
 
 def load_sumfile(filepath_tests, filename):
     """Test loading a file"""
-    fname = filepath_tests / "test_data" / filename
+    fname = filepath_tests + "test_data" / filename
     with open(fname, encoding="utf-8") as f:
         data = f.readlines()
     return data
