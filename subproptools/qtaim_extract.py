@@ -763,7 +763,7 @@ def get_sub_props(atomDict: dict, subAtoms: list[int], atomList: list[str]):
     )
     groupDict.update(
         {
-            "|Mu_Bond|": [
+            "|Mu|": [
                 math.sqrt(
                     groupDict["Mu_X"][0] ** 2
                     + groupDict["Mu_Y"][0] ** 2
