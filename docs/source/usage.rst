@@ -1,15 +1,6 @@
 Property Extraction Usage
 =========================
 
-Installation
-------------
-
-To use subproptools, first install it using pip:
-
-.. code-block:: console
-
-   (.venv) $ pip install subproptools
-
 Get xyz of atoms in sumfile
 ---------------------------
 
